@@ -1,0 +1,10 @@
+db.sqlite3
+/venv
+/env
+__pycache__
+migrations
+**/migrations/**
+media
+/cursos/migrations/
+.idea
+.env
