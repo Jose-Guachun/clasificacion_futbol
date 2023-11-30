@@ -1,5 +1,4 @@
-from django.contrib.auth.models import User
-from users.models import Persona
+from users.models import Persona, User
 from django.db import transaction
 
 from core.funciones import generar_username, generar_password
@@ -22,7 +21,7 @@ def cargar_inputs(form):
     context['activo'] = form.cleaned_data['activo'] if 'activo' in form.cleaned_data else None
     return context
 
-def add_user_with_profile(request, form, tipoperfil, password=None, persona=None):
+def add_user_with_profile(request, form, perfil, password=None, persona=None):
     try:
         context = {}
         data=cargar_inputs(form)
@@ -42,7 +41,7 @@ def add_user_with_profile(request, form, tipoperfil, password=None, persona=None
                         telefono=data['telefono'],
                         sexo=data['sexo'],
                         fecha_nacimiento=data['fecha_nacimiento'],
-                        tipoperfil=tipoperfil,
+                        perfil=perfil,
                         nacionalidad=data['nacionalidad'])
         persona.save(request)
         context['id_persona'] = persona.id

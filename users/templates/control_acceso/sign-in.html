@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content_js %}
+    <script type="text/javascript" src="{% static 'js/formquestion.js' %}"></script>
+{% endblock %}
+  <!-- Page content -->
+{% block content %}
+    <div class="container d-flex flex-column">
+        <div class="row align-items-center justify-content-center g-0 min-vh-100">
+
+          <div class="col-lg-5 col-md-8 py-8 py-xl-0">
+            <!-- Card -->
+            <div class="card shadow ">
+              <!-- Card body -->
+              <div class="card-body p-6">
+                <div class="mb-4">
+                  <a href="../index.html"><img src="../assets/images/brand/logo/logo-icon.svg" class="mb-4" alt=""></a>
+                  <h1 class="mb-1 fw-bold">Iniciar sesión</h1>
+                  <span>¿No estas registrado? <a href="{% url 'users:signup' %}" class="ms-1">Registrate</a></span>
+                </div>
+{#              <div>#}
+{#                <span class="text-danger" id="message_top"><i class="fas fa-info-circle"></i></span>#}
+{#              </div>#}
+                <!-- Form -->
+                <form  class="sign-in-form form-s" autocomplete="off" method="POST" enctype="multipart/form-data" action="{{ request.path }}">
+                    {% csrf_token %}
+                    {% for field in form %}
+                      <div class="mb-3">
+                        <label for="email" class="form-label">{{ field.label}} <b class="text-danger">*</b>:</label>
+                        <input type="{{ field.widget_type }}" id="email" class="form-control" name="{{ field.name }}" placeholder="Ingrese su {{ field.label|lower }}" required>
+                        <span class="text-danger errorField" id="errorField{{ field.name }}"></span>
+                      </div>
+                        <!-- Checkbox -->
+                    {% endfor %}
+                  <div class="d-lg-flex justify-content-between align-items-center mb-4">
+                    <div class="form-check">
+                      <input type="checkbox" class="form-check-input" id="rememberme">
+                      <label class="form-check-label " for="rememberme">Recordar</label>
+                    </div>
+                    <div>
+                      <a href="forget-password.html">¿Olvidaste tu contraseña?</a>
+                    </div>
+                  </div>
+                  <div>
+                        <!-- Button -->
+                      <div class="d-grid">
+                    <button type="submit" class="btn btn-primary">Iniciar Sesión</button>
+                  </div>
+                  </div>
+                  <hr class="my-4">
+                  <div class="mt-4 text-center">
+                    <!--Facebook-->
+                    <a href="#" class="btn-social btn-social-outline btn-facebook">
+                      <i class="mdi mdi-facebook fs-4"></i>
+                    </a>
+                    <!--Twitter-->
+                    <a href="#" class="btn-social btn-social-outline btn-twitter">
+                      <i class="mdi mdi-twitter fs-4"></i>
+                    </a>
+                    <!--LinkedIn-->
+                    <a href="#" class="btn-social btn-social-outline btn-linkedin">
+                      <i class="mdi mdi-linkedin"></i>
+                    </a>
+                    <!--GitHub-->
+                    <a href="#" class="btn-social btn-social-outline btn-github">
+                      <i class="mdi mdi-github"></i>
+                    </a>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+{% endblock %}
+

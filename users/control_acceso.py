@@ -33,7 +33,7 @@ from core.generic_save import add_user_with_profile
 
 class LoginView(FormView):
     # login view
-    template_name = 'index.html'
+    template_name = 'control_acceso/sign-in.html'
     form_class = LoginForm
 
     def get_context_data(self, **kwargs):
@@ -48,20 +48,14 @@ class LoginView(FormView):
             if not form.is_valid():
                 form_e = [{k: v[0]} for k, v in form.errors.items()]
                 return JsonResponse({"result": False, "mensaje": 'Inicio de sesión fallido', "form": form_e})
-            email=form.cleaned_data['email']
-            user = authenticate(username=email, password=form.cleaned_data['password'])
+            username=form.cleaned_data['username']
+            user = authenticate(username=username, password=form.cleaned_data['password'])
             if not Persona.objects.filter(usuario=user):
                 raise NameError('El usuario que intenta autenticar no dispone de perfil en esta aplicación.')
             persona = Persona.objects.get(usuario=user)
-            perfil=persona.mi_perfil_principal()
-            if not perfil:
-                raise NameError('La cuenta que intenta iniciar sesión no dispone de un perfil activo.')
-            request.session.set_expiry(240 * 60)
             login(self.request, user)
-            request.session['persona'] = persona
-            request.session['perfiles'] = persona.mis_perfilesusuarios()
-            request.session['perfil'] = perfil
-            request.session['modulo_categorias'] = ModuloCategoria.objects.filter(status=True)
+            # request.session['persona'] = persona
+            request.session['perfil'] = persona.get_perfil_display()
             url_redirect = request.GET.get('next',reverse('users:home'))
             return JsonResponse({"result": True, "sessionid": request.session.session_key, 'url_redirect': url_redirect})
         except Exception as ex:
@@ -92,8 +86,8 @@ class SignupView(FormView):
             if not form.is_valid():
                 form_e = [{k: v[0]} for k, v in form.errors.items()]
                 return JsonResponse({"result": False, "mensaje": 'Conflicto en formulario', "form": form_e})
-            add_user_with_profile(request,form,'estudiante',form.cleaned_data.get('password'))
-            # user = authenticate(email=form.cleaned_data.get('email'), password=form.cleaned_data.get('password'))
+            add_user_with_profile(request,form,1,form.cleaned_data.get('password'))
+            # user = authenticate(username=form.cleaned_data.get('email'), password=form.cleaned_data.get('password'))
             # login(self.request, user)
             url_redirect = request.GET.get('next', reverse('users:login'))
             return JsonResponse({"result": True, "sessionid": request.session.session_key, 'url_redirect': url_redirect})

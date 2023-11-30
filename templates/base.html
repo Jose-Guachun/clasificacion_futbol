@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    {% load static %}
+    <title class="capfirst">{% block title %}{{ title|lower|capfirst }}{% endblock %}</title>
+    <!------------BOOTSTRAP5----->
+    <link rel="stylesheet" href="{% static 'bootstrap5/css/theme.min.css' %}?v=1.2">
+    <link rel="stylesheet" href="{% static 'bootstrap5/libs/bootstrap-icons/font/bootstrap-icons.css' %}">
+    <link rel="stylesheet" href="{% static 'bootstrap5/fonts/feather/feather.css' %}">
+    <link rel="stylesheet" href="{% static 'bootstrap5/libs/bootstrap-select/dist/css/bootstrap-select.min.css' %}">
+    <link rel="stylesheet" href="{% static 'bootstrap5/libs/datatables.net-bs5/css/dataTables.bootstrap5.min.css' %}">
+    <link rel="stylesheet" href="{% static 'bootstrap5/libs/tippy.js/dist/tippy.css' %}">
+    <link rel="stylesheet" href="{% static 'bootstrap5/libs/@mdi/font/css/materialdesignicons.min.css' %}">
+    <link rel="stylesheet" href="{% static 'bootstrap5/libs/magnific-popup/dist/magnific-popup.css' %}">
+    <link rel="stylesheet" href="{% static 'bootstrap5/libs/@yaireo/tagify/dist/tagify.css' %}">
+    <link rel="stylesheet" href="{% static 'bootstrap5/libs/tiny-slider/dist/tiny-slider.css' %}">
+    <link rel="stylesheet" href="{% static 'bootstrap5/libs/simplebar/dist/simplebar.min.css' %}">
+
+    <!------------ SWEETALERT2 --------->
+    <link rel="stylesheet" href="{% static 'sweet2/sweetalert2.min.css' %}">
+
+    <!------------ SELECT2 --------->
+    <link rel="stylesheet" href="{% static 'select2/select2.min.css' %}?v=1">
+
+    <!------------ FONTAWESOME --------->
+    <link rel="stylesheet" href="{% static 'fontawesome_6.4.0/css/all.css' %}">
+
+    <!------------ PROYECTO --------->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=0.1">
+    <style>
+        #m-content{
+            border-radius: 1.5rem;
+
+        }
+    </style>
+    <!----- BLOQUE PARA EXTRA CSS ------>
+    {% block heading %}{% endblock %}
+</head>
+<body>
+{% block content %}
+
+{% endblock %}
+<div class="modal fade" id="generic-modal" tabindex="-1" role="dialog" aria-labelledby="generic-modal"
+     aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" id="wmodal">
+        <div class="modal-content border-0" id="m-content">
+            <div class="modal-header border-0 pb-0">
+                <h4 class="modal-title">
+                    <i class="fas fa-outdent me-1" id="title-icon"></i> <span id="panel-title">FORMULARIO MODAL</span>
+                </h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close">
+                </button>
+            </div>
+            <div class="modal-body">
+                <form class="form-horizontal form-modal" autocomplete="off" method="post" enctype="multipart/form-data"
+                      action="{{ request.path }}">
+                    {% csrf_token %}
+                    <div class="row" id="panel-body">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer" id="panel-footer">
+                <button type="button" class="btn btn-outline-white" data-bs-dismiss="modal" id="cerrar"><i class="fas fa-times"></i> Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!----- BOOTSTRAP5 JS ------>
+<script type="text/javascript" src="{% static 'bootstrap5/libs/jquery/dist/jquery.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'bootstrap5/js/jquery.blockUI.js' %}"></script>
+<script type="text/javascript" src="{% static 'bootstrap5/libs/bootstrap/dist/js/bootstrap.bundle.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'bootstrap5/libs/dragula/dist/dragula.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'bootstrap5/libs/bootstrap-select/dist/js/bootstrap-select.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'bootstrap5/libs/fullcalendar/main.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'bootstrap5/libs/flatpickr/dist/flatpickr.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'bootstrap5/libs/inputmask/dist/jquery.inputmask.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'bootstrap5/libs/quill/dist/quill.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'bootstrap5/libs/magnific-popup/dist/jquery.magnific-popup.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'bootstrap5/libs/file-upload-with-preview/dist/file-upload-with-preview.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'bootstrap5/libs/@yaireo/tagify/dist/tagify.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'bootstrap5/libs/bs-stepper/dist/js/bs-stepper.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'bootstrap5/libs/tiny-slider/dist/min/tiny-slider.js' %}"></script>
+<script type="text/javascript" src="{% static 'bootstrap5/libs/@popperjs/core/dist/umd/popper.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'bootstrap5/libs/tippy.js/dist/tippy-bundle.umd.min.js' %}"></script>
+<script type="text/javascript" src="{% static 'bootstrap5/libs/simplebar/dist/simplebar.min.js' %}"></script>
+
+<!----- DATATABLE JS ------>
+<script src="{% static 'bootstrap5/libs/datatables.net/js/jquery.dataTables.min.js' %}"></script>
+<script src="{% static 'bootstrap5/libs/datatables.net-bs5/js/dataTables.bootstrap5.min.js' %}"></script>
+<script src="{% static 'bootstrap5/libs/datatables.net-responsive/js/dataTables.responsive.min.js' %}"></script>
+<script src="{% static 'bootstrap5/libs/datatables.net-responsive-bs5/js/responsive.bootstrap5.min.js' %}"></script>
+
+<!----- TEMA PRINCIPAL ------>
+<script type="text/javascript" src="{% static 'bootstrap5/js/theme.min.js' %}"></script>
+
+<!----- SWEETALER2 JS ------>
+<script type="text/javascript" src="{% static 'sweet2/sweetalert2.all.min.js' %}"></script>
+
+<!----- SELECT2 JS ------>
+<script type="text/javascript" src="{% static 'select2/select2.min.js' %}"></script>
+
+<!----- FONTAWESOME ------>
+<script src="{% static 'fontawesome_6.4.0/js/all.js' %}" crossorigin="anonymous"></script>
+
+{#<!----------------- SCRIPTS PARA PROYECTO-------------------->#}
+{#<script type="text/javascript" src="{% static 'js/jquery-executed.js' %}"></script>#}
+
+
+<!----- FUNCIONES REUTILIZABLES JS ------>
+<script type="text/javascript" src="{% static 'js/utils.js' %}?v1.2"></script>
+
+<!----- CONTROL MODAL JS ------>
+<script type="text/javascript">
+    $(function () {
+        {% if messages %}
+            {% for message in messages %}
+                console.log(`{{ message }}`)
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: '{% if message.tags %}{{ message.tags }}{% endif %}',
+                    title: `{{ message }}`,
+                    showConfirmButton: false,
+                    timer: 8000
+                })
+                var swal2Content = document.querySelector('.swal2-content');
+                swal2Content.remove();
+            {% endfor %}
+        {% endif %}
+    })
+    function formModal(id, titulo, action, dimension="modal-lg", footer = false, idp, idex,icon='fa-outdent') {
+    bloqueointerface()
+    $.ajax({
+        type: "GET",
+        url: `{{ request.path }}`,
+        data: {
+            'action': action,
+            'id': id,
+            'idp': idp,
+            'idex': idex,
+        },
+        success: function (data) {
+            $.unblockUI();
+            $('#panel-footer').show();
+            $('#title-icon').removeClass('fa-outdent').addClass(icon)
+            $('#wmodal').removeClass('modal-lg modal-md modal-xl modal-fullscreen modal-sm').addClass(dimension)
+            if (data.result === true) {
+                if (footer === false) {
+                    $('#panel-footer').hide();
+                }
+                $('#panel-body').html(data.data);
+                $('#generic-modal #panel-title').html(titulo.charAt(0).toUpperCase() + titulo.slice(1).toLowerCase());
+                $("#generic-modal").modal({backdrop: 'static'}).modal('show');
+            } else {
+                mensajeDanger('Conflicto en la acción',data.mensaje);
+            }
+        },
+        error: function () {
+            $.unblockUI();
+            mensajeDanger("Error de conexión.");
+        },
+        dataType: "json"
+    });
+}
+    function eliminarajax(pk, nombre, accion, url = '{{ request.path }}', titulo = 'Estás por eliminar este registro:') {
+        Swal.fire({
+            html: `<b>${titulo}</b><p>${nombre}</p>`,
+            text: "Esta acción es irreversible",
+            icon: 'warning',
+            showCancelButton: true,
+            allowOutsideClick: false,
+            confirmButtonText: 'Si, deseo hacerlo',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.value) {
+                $.ajax({
+                    type: 'POST',
+                    url: '{{ reques.path }}',
+                    async: false,
+                    data: {
+                        csrfmiddlewaretoken: '{{ csrf_token }}',
+                        action: accion,
+                        id: pk,
+                    },
+                    dataType: "json",
+                    beforeSend: function () {
+                        bloqueointerface();
+                    }
+                }).done(function (data) {
+                    setTimeout($.unblockUI, 1);
+                    if (data.result === true) {
+                        location.reload();
+                    }else{
+                        alertaDanger(data.mensaje)
+                    }
+                }).fail(function (jqXHR, textStatus, errorThrown) {
+                    setTimeout($.unblockUI, 1);
+                    alertaDanger('Error en el servidor', 10000)
+                }).always(function () {
+                });
+            } else {
+            }
+        })
+    }
+</script>
+
+<!----- CONTENEDOR PARA JS EXTRA ------>
+{% block content_js %}{% endblock %}
+</body>
+</html>

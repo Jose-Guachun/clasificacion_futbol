@@ -1,0 +1,80 @@
+.select2-container {
+  /* Estilos para el contenedor principal */
+
+}
+
+.select2-dropdown {
+}
+/* Estilos personalizados para Select2 */
+.select2-selection__rendered {
+  padding: .55rem 1.25rem!important;
+  font-size: 14px; /* Ajusta el tamaño de fuente según tus necesidades */
+  border-radius: 0.25rem;
+}
+
+.select2-selection__arrow {
+  height: 40px; /* Ajusta la altura según tus necesidades */
+}
+
+.select2-selection__arrow b {
+  margin-top: 14px; /* Ajusta el espaciado vertical según tus necesidades */
+}
+
+.select2-container--default .select2-selection--single {
+  height: 48.39px; /* Ajusta la altura según tus necesidades */
+  border:1px solid #e8e7ed!important;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__arrow {
+  top: 6px; /* Ajusta la posición vertical según tus necesidades */
+}
+
+.btn{
+  padding: 0.55rem 1rem !important;
+}
+.siglas-sm span{
+	width:32px;
+	height:32px;
+	font-size: 15px;
+	padding-top: 2px;
+	color: #ffffff;
+	background-color: #1476b8;
+	line-height: 30px;
+	border-radius: 30px;
+	float: left;
+	text-align: center;
+	font-weight: 600;
+	margin-top: 10px;
+}
+
+.siglas-md span {
+	color: #ffffff;
+	font-size: 20px;
+	padding-top: 5px;
+	width: 40px;
+	height: 40px;
+	background-color: #1476b8;
+	line-height: 30px;
+	border-radius: 30px;
+	float: left;
+	text-align: center;
+	font-weight: 600;
+	margin-top: 10px;
+}
+
+.siglas-md span:hover{
+	background-color: #1476b8;
+	border:1px solid rgb(255, 255, 255);
+}
+.siglas-md button{
+	background-color:transparent;
+	border-color:transparent;
+}
+.siglas-md button:hover{
+	background-color:transparent;
+	border-color:transparent;
+}
+
+.capitalize {
+	text-transform: capitalize;
+}

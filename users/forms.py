@@ -30,7 +30,7 @@ class LoginForm(forms.Form):
             self.add_error('email', 'No existe usuario con los datos ingresado.')
         else:
             usuario=User.objects.get(Q(email=email) | (Q(username=email)))
-            cleaned_data['email']=usuario.email
+            cleaned_data['username'] = usuario.username
             if not usuario.is_active:
                 self.add_error('email', 'Este usuario ha sido desactivado.')
             elif not check_password(password, usuario.password):

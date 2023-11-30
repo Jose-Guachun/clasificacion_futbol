@@ -38,15 +38,6 @@ class ModeloBase(models.Model):
 
     def save(self, *args, **kwargs):
         self.validate_unique()
-        if len(args):
-            usuario = args[0].user.id
-        for key, value in kwargs.items():
-            if 'usuario_id' == key:
-                usuario = value
-        if self.id:
-            self.usuario_modificacion_id = usuario if usuario else ADMINISTRADOR_ID
-        else:
-            self.usuario_creacion_id = usuario if usuario else ADMINISTRADOR_ID
         models.Model.save(self)
 
     class Meta:

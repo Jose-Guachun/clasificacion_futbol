@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+    <!-- Page content -->
+    <div class="container d-flex flex-column">
+        <div class="row align-items-center justify-content-center g-0 min-vh-100">
+            <div class="col-lg-7 col-md-8 py-8 py-xl-0">
+                <!-- Card -->
+                <div class="card shadow">
+                    <!-- Card body -->
+                    <div class="card-body p-6">
+                        <div class="mb-4">
+                            <a href="../index.html"><img src="../assets/images/brand/logo/logo-icon.svg" class="mb-4"
+                                                         alt=""/></a>
+                            <h1 class="mb-1 fw-bold">{{ title }}</h1>
+                            <span>¿Ya tienes una cuenta?
+								<a href="{% url 'users:login' %}" class="ms-1">Iniciar sesión</a></span>
+                        </div>
+                        <!-- Form -->
+                        <form class="form-s row" autocomplete="off" method="POST" enctype="multipart/form-data"
+                              action="{{ request.path }}">
+                            {% csrf_token %}
+                            {% block action %}
+                                <input type="hidden" name="action" value="{{ action }}">
+                            {% endblock %}
+                            <div class="alert alert-danger d-flex align-items-center d-none" id="text-alerta"
+                                 role="alert">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor"
+                                     class="bi bi-exclamation-triangle-fill me-2" viewBox="0 0 16 16">
+                                    <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+                                </svg>
+                                <div id="message_top">
+                                </div>
+                            </div>
+                            {% for item in form %}
+                                <div class="col-12 col-lg-{% if item.field.widget.attrs.col %}{{ item.field.widget.attrs.col }}{% else %}12{% endif %} mb-2">
+                                    <label for="courseTitle" class="form-label mb-1">{{ item.label }}:</label>
+                                    {% if item.field.widget.attrs.editor %}
+                                        <input type="hidden" id="id_{{ item.name }}" name="{{ item.name }}"
+                                               value="{{ item.value }}">
+                                        <div class="miEditor" id="editor_{{ item.name }}"
+                                             style="min-height: 10rem"></div>
+                                    {% elif item.field.widget.attrs.switch and item.widget_type == 'checkbox' %}
+                                        <span class="form-check form-switch form-switch-price">
+                                                        {{ item }}
+                                                    </span>
+                                    {% else %}
+                                        {{ item }}
+                                    {% endif %}
+                                    <div class="ps-1">
+                                        <p class="lh-2"><small>{{ item.help_text }}</small></p>
+                                        <small><p class="lh-2 text-danger errorField"
+                                                  id="errorField{{ item.name }}"></p></small>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                            <div class="mb-3">
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" id="agreeCheck" required/>
+                                    <label class="form-check-label" for="agreeCheck">
+                                        <span>Acepto los <a href="terms-condition-page.html"> Términos de servicio </a>
+                                            y <a href="terms-condition-page.html">La política de privacidad.</a></span></label>
+                                </div>
+                            </div>
+                            <div>
+                                <!-- Button -->
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-primary">
+                                        Crear cuenta gratis
+                                    </button>
+                                </div>
+                            </div>
+                            <hr class="my-4"/>
+                            <div class="mt-4 text-center">
+                                <!--Facebook-->
+                                <a href="#" class="btn-social btn-social-outline btn-facebook">
+                                    <i class="mdi mdi-facebook fs-4"></i>
+                                </a>
+                                <!--Twitter-->
+                                <a href="#" class="btn-social btn-social-outline btn-twitter">
+                                    <i class="mdi mdi-twitter fs-4"></i>
+                                </a>
+                                <!--LinkedIn-->
+                                <a href="#" class="btn-social btn-social-outline btn-linkedin">
+                                    <i class="mdi mdi-linkedin"></i>
+                                </a>
+                                <!--GitHub-->
+                                <a href="#" class="btn-social btn-social-outline btn-github">
+                                    <i class="mdi mdi-github"></i>
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block content_js %}
+    <script type="text/javascript" src="{% static 'js/formquestion.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/validators.js' %}"></script>
+{% endblock %}

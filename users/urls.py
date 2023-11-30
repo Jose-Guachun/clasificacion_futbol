@@ -4,12 +4,12 @@
 from django.urls import path, re_path
 
 # importaciones de apps
-from users import control_acceso
+from users import control_acceso, adm_panel
 
 urlpatterns = [
     #PANTALLAS PRINCIPALES
-    # re_path(r'^$',adm_panel.HomeView.as_view(), name='home'),
-    # re_path(r'^main$', adm_panel.MainView.as_view(), name='main'),
+    re_path(r'^$',adm_panel.HomeView.as_view(), name='home'),
+    re_path(r'^main$', adm_panel.MainView.as_view(), name='main'),
 
     #ACCESO AL SISTEMA
     re_path(r'^login$',control_acceso.LoginView.as_view(), name='login'),

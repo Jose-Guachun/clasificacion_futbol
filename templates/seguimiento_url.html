@@ -1,0 +1,27 @@
+ <div class="row">
+    <div class="col-12">
+        <!-- Page Header -->
+        <div class="border-bottom pb-4 mb-3 d-md-flex align-items-center justify-content-between">
+            <div class="mb-3 mb-md-0">
+                <h1 class="mb-1 h2 fw-bold">{{ title }}</h1>
+                <!-- Breadcrumb -->
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item">
+                            <a href="admin-dashboard.html">Inicio</a>
+                        </li>
+                        <li class="breadcrumb-item">
+                            <a href="#">Cursos</a>
+                        </li>
+                        <li class="breadcrumb-item active" aria-current="page">
+                            Todo
+                        </li>
+                    </ol>
+                </nav>
+            </div>
+            <div>
+                <a href="{% block url_atras %}/{% endblock %}" class="btn btn-primary">Atras</a>
+            </div>
+        </div>
+    </div>
+</div>

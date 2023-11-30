@@ -1,7 +1,7 @@
 from django.shortcuts import redirect
 from django.urls import reverse
 
-from users.models import User
+from django.contrib.auth.models import User
 
 
 class BlockUrlsMiddleware:
