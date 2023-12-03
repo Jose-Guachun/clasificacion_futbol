@@ -15,6 +15,7 @@ SEXO = (
 )
 
 PERFIL_USUARIO = (
+    (0, 'Sin perfil'),
     (1, 'Administrador'),
     (2, 'Asistente'),
     (3, 'Registrador'),

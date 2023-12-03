@@ -39,20 +39,17 @@
                             <i class="nav-icon fe fe-home me-2"></i> Inicio
                         </a>
                     </li>
-{#                    <li class="nav-item">#}
-{#                        <div class="navbar-heading">Usuarios</div>#}
-{#                    </li>#}
                     <!-- Nav item -->
                     <li class="nav-item">
-                        <a class="nav-link " href="chat-app.html">
+                        <a class="nav-link bloqueo {% if viewactivo == 'usuarios' %}active{% endif %}" href="{% url 'users:usuarios' %}">
                             <i class="nav-icon fe fe-user-check me-2"></i> Usuarios
                         </a>
                     </li>
                     <!-- Nav item -->
                     <li class="nav-item">
-                        <a class="nav-link " href="task-kanban.html">
-                            <i class="nav-icon mdi fas fa-people-group me-2"></i>
-                            Equipos
+                        <a class="nav-link bloqueo {% if viewactivo == 'clubes' %}active{% endif %}" href="{% url 'clubes:gestion_clubes' %}">
+                            <i class="nav-icon mdi fa-brands fa-hubspot me-2"></i>
+                            Clubes
                         </a>
                     </li>
                     <!-- Nav item -->
@@ -152,9 +149,9 @@
                                             </div>
                                         </li>
                                     </ul>
-                                    <div class="border-top px-3 pt-3 pb-0">
+                                    <div class="border-top px-3 pt-3 pb-0 text-center">
                                         <a href="../notification-history.html" class="text-link fw-semi-bold">
-                                            Ver todas las notificaciones
+                                           <i class="fas fa-bell"></i> Ver todas las notificaciones
                                         </a>
                                     </div>
                                 </div>

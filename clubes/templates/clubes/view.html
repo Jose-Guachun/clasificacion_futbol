@@ -1,0 +1,128 @@
+{% extends 'base_admin.html' %}
+{% load static %}
+{% load extra_tags %}
+{% block heading %}{% endblock %}
+{% block extra_js %}
+    <script type="text/javascript">
+        $(function (){
+            $("#l_total").text('({{ listado.count }})')
+        })
+    </script>
+{% endblock %}
+{% block enlaces_top %}
+    <li class="breadcrumb-item">{{ title }}</li>
+{% endblock %}
+{% block botones_top %}
+    <div class="nav btn-group" role="tablist">
+        <a href="javascript:void(0)"
+         onclick="formModal('','Adicionar Club','addclub','modal-md')" class="btn btn-success btn-xs btn-xl" title="Adicionar club" data-bs-toggle="tooltip"> <i class="fas fa-plus"></i> Adicionar</a>
+    </div>
+{% endblock %}
+{% block content_1 %}
+    <div class="row mb-3">
+        <form class="col-12" method="GET">
+            <!-- Card header -->
+            <div class="card-header border-bottom-0 p-0 bg-white">
+                <div class="d-flex align-items-center">
+                    <span class="position-absolute ps-3 search-icon">
+                        <i class="fe fe-search"></i>
+                    </span>
+                    <input type="search" class="form-control ps-6" name="s" placeholder="Buscar por nombre del club" value="{{ s }}"/>
+                </div>
+            </div>
+        </form>
+    </div>
+    <div class="row">
+        <div class="col-12">
+        <div class="card">
+            <!-- table -->
+            <div class="table-responsive">
+                <table class="table mb-0 text-nowrap table-bordered" id="l_table">
+                    <thead class="table-light">
+                        <tr>
+                             <th scope="col" class="text-center w-5">
+                                <i class="fas fa-sort-numeric-asc"></i>
+                            </th>
+                            <th scope="col" class="w-15">
+                                Club
+                            </th>
+                            <th scope="col" class="">
+                                Descripcion
+                            </th>
+                            <th scope="col" class="text-center w-5">
+                                Activo
+                            </th>
+                            <th scope="col" class="text-center w-5">
+                                <i class="fas fa-cogs"></i>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for l in listado %}
+                        <tr>
+                            <td class="text-center align-middle w-5">{{ forloop.counter }}</td>
+                            <td class="align-middle border-top-0 w-20">
+                                <div class="d-flex align-items-center">
+                                    {{ l.get_avatar_img_md|safe }}
+                                    <div class="my-0 lh-15">
+                                        <p class="fw-bold"></p><i class="fas fa-user"></i> {{ l.nombres_completos_lienal }}</p>
+                                        <p class=""><i class="fas fa-id-card-clip"></i> {{ l.cedula }}</p>
+                                        <p class=""><i class="fas fa-envelope"></i> {{ l.email }}</p>
+                                        <p class=""><i class="fas fa-calendar-day"></i> {{ l.fecha_nacimiento|default_if_none:'S/F' }}</p>
+                                    </h5>
+                                </div>
+                            </td>
+                            
+                            <td class="align-middle border-top-0 w-15 lh-15">
+                                <p><i class="fa-solid fa-venus-mars"></i> {{ l.get_sexo_display|default_if_none:'S/S' }}</p>
+                                <p><i class="fa-solid fa-mobile"></i> {{ l.celular }}</p>
+                                <p><i class="fa-brands fa-font-awesome"></i> {{ l.nacionalidad.nacionalidad|title|default_if_none:'S/N' }}</p>
+                                <p><i class="fa-solid fa-location-dot"></i> {{ l.ciudad|default_if_none:'S/C' }}</p>
+                            </td>
+                            <td class="align-middle border-top-0 text-center w-5">
+                                <p>{{l.get_perfil_display}}</p>
+                            </td>
+                            <td class="align-middle border-top-0 text-center w-5">
+                                <input type="checkbox" class="form-check-input" {% if l.usuario.is_active %}checked{% endif %}>
+                            </td>
+                            <td class="align-middle border-top-0 text-center w-5">
+                                <span class="dropdown dropstart">
+                                  <a class="btn-icon btn btn-sm rounded-circle" href="#"
+                                     role="button"
+                                     id="courseDropdown1"
+                                     data-bs-toggle="dropdown" data-bs-offset="-20,20"
+                                     aria-expanded="false">
+                                  <i class="fe fe-more-vertical"></i>
+                                  </a>
+                                  <span class="dropdown-menu" aria-labelledby="courseDropdown1">
+                                  <span class="dropdown-header"><i class="fas fa-cogs"></i> Acciones</span>
+                                    <a class="dropdown-item"
+                                       href="{{ request.path }}?action=editusuario&id={{ l.pk|encrypt }}">
+                                        <i class="fe fe-edit dropdown-item-icon"></i>Editar
+                                    </a>
+                                    <a class="dropdown-item" href="javascript:void(0);"
+                                        onclick="formModal('{{ l.pk|encrypt }}','Gestionar usuario','gestionarusuario','modal-md',false,'','','fa-user-gear')">
+                                        <i class="fas fa-user-gear dropdown-item-icon"></i> Gestionar usuario
+                                    </a>
+                                    <a class="dropdown-item" href="javascript:void(0);"
+                                         onclick="eliminarajax('{{ l.pk|encrypt }}','{{l}}','delusuario')">
+                                        <i class="fas fa-trash dropdown-item-icon"></i> Eliminar
+                                    </a>
+                                  </span>
+                                </span>
+                            </td>
+                        </tr>
+                    {% empty %}
+                        <tr>
+                            <td colspan="5" class="text-center">No existen registros</td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+                <!-- Pagination -->
+                {% include 'paginador.html' %}
+            </div>
+        </div>
+        </div>
+    </div>
+{% endblock %}

@@ -23,6 +23,23 @@ def filtro_persona_generico(filtro, search):
                            (Q(persona__nombres__contains=s[0]) & Q(persona__nombres__contains=s[1]) & Q(persona__apellido1__contains=s[2])))
     return filtro
 
+def filtro_persona_generico_principal(filtro, search):
+    q = search.upper().strip()
+    s = q.split(" ")
+    if len(s) == 1:
+        filtro = filtro & ((Q(nombres__icontains=q) |
+                            Q(apellido1__icontains=q) |
+                            Q(cedula__icontains=q) |
+                            Q(apellido2__icontains=q) |
+                            Q(cedula__contains=q)))
+    elif len(s) == 2:
+        filtro = filtro & ((Q(apellido1__contains=s[0]) & Q(apellido2__contains=s[1])) |
+                           (Q(nombres__icontains=s[0]) & Q(nombres__icontains=s[1])) |
+                           (Q(nombres__icontains=s[0]) & Q(apellido1__contains=s[1])))
+    else:
+        filtro = filtro & ((Q(nombres__contains=s[0]) & Q(apellido1__contains=s[1]) & Q(apellido2__contains=s[2])) |
+                           (Q(nombres__contains=s[0]) & Q(nombres__contains=s[1]) & Q(apellido1__contains=s[2])))
+    return filtro
 
 def generar_username(nombres, apellido1, apellido2):
     username = nombres[0] + apellido1 + apellido2[0]

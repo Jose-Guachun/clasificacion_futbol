@@ -5,7 +5,7 @@ from django.shortcuts import render
 from django.views import View
 from datetime import date, datetime
 
-class MainView(View):
+class MainView(LoginRequiredMixin, View):
     # User detail view
     def get(self, request, *args, **kwargs):
         context = {}

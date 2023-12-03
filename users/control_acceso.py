@@ -55,7 +55,7 @@ class LoginView(FormView):
             persona = Persona.objects.get(usuario=user)
             login(self.request, user)
             # request.session['persona'] = persona
-            request.session['perfil'] = persona.get_perfil_display()
+            request.session['perfil'] = persona.perfil
             url_redirect = request.GET.get('next',reverse('users:home'))
             return JsonResponse({"result": True, "sessionid": request.session.session_key, 'url_redirect': url_redirect})
         except Exception as ex:

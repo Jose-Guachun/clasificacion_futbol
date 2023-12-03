@@ -19,9 +19,10 @@ def cargar_inputs(form):
     context['tipoprofesor'] = form.cleaned_data['tipoprofesor'] if 'tipoprofesor' in form.cleaned_data else None
     context['fechaingreso'] = form.cleaned_data['fechaingreso'] if 'fechaingreso' in form.cleaned_data else None
     context['activo'] = form.cleaned_data['activo'] if 'activo' in form.cleaned_data else None
+    context['perfil'] = form.cleaned_data['perfil'] if 'perfil' in form.cleaned_data else None
     return context
 
-def add_user_with_profile(request, form, perfil, password=None, persona=None):
+def add_user_with_profile(request, form, perfil=None, password=None, persona=None):
     try:
         context = {}
         data=cargar_inputs(form)
@@ -41,7 +42,7 @@ def add_user_with_profile(request, form, perfil, password=None, persona=None):
                         telefono=data['telefono'],
                         sexo=data['sexo'],
                         fecha_nacimiento=data['fecha_nacimiento'],
-                        perfil=perfil,
+                        perfil=perfil if perfil else data['perfil'],
                         nacionalidad=data['nacionalidad'])
         persona.save(request)
         context['id_persona'] = persona.id
@@ -73,7 +74,7 @@ def add_user_with_profile(request, form, perfil, password=None, persona=None):
         transaction.set_rollback(True)
         raise NameError(str(ex))
 
-def edit_persona_with_profile(request, form, tipoperfil, id_persona):
+def edit_persona_with_profile(request, form, perfil=None, id_persona=None):
     context={}
     data = cargar_inputs(form)
     persona=Persona.objects.get(id=id_persona)
@@ -90,6 +91,7 @@ def edit_persona_with_profile(request, form, tipoperfil, id_persona):
     persona.sexo=data['sexo']
     persona.fecha_nacimiento=data['fecha_nacimiento']
     persona.nacionalidad=data['nacionalidad']
+    persona.perfil=perfil if perfil else data['perfil']
     persona.save(request)
     context['id_persona'] = persona.id
     # if tipoperfil == 'docente':

@@ -12418,6 +12418,9 @@ textarea.form-control-lg {
 .lh-1 {
     line-height: 1 !important
 }
+.lh-15 {
+    line-height: 1.25 !important
+}
 
 .lh-2 {
     line-height: 1.5 !important

@@ -1,0 +1,84 @@
+{% extends 'base_admin.html' %}
+{% load static %}
+{% load extra_tags %}
+{% block heading %}
+
+{% block heading_1 %}{% endblock %}
+{% endblock %}
+{% block extra_js %}
+    <script type="text/javascript" src="{% static 'js/formquestion.js' %}"></script>
+    <script type="text/javascript" src="{% static 'js/validators.js' %}"></script>
+    <script type="text/javascript">
+        document.addEventListener("DOMContentLoaded", function(event) {
+            document.getElementById("id_cancelar").addEventListener("click", function() {
+                document.getElementById("id_atras").click();
+            });
+        });
+    </script>
+    {% block extra_js_1 %}{% endblock %}
+{% endblock %}
+{% block content_1 %}
+    <div class="pb-12">
+        <div class="container">
+            <div class="row">
+                <div class="offset-lg-1 col-lg-10 col-md-12 col-12">
+                    <form  class="form-s" autocomplete="off" method="POST" enctype="multipart/form-data" action="{{ request.path }}">
+                    {% csrf_token %}
+                    <input type="hidden" name="id" value="{{ id|encrypt }}">
+                    {% block action %}
+                        <input type="hidden" name="action" value="{{ action }}">
+                    {% endblock %}
+                        <!-- Content one -->
+                        <div id="test-l-1" class=""
+                             aria-labelledby="courseFormtrigger1">
+                            <!-- Card -->
+                            <div class="card mb-3">
+                                <div class="card-header">
+                                    <h4 class="mb-0"><i class="fa-solid fa-outdent me-1 capfirst"></i>
+                                        {% block head_title %}
+                                            {% if head_title %}{{ head_title|lower|capfirst }}{% else %}Crear registro{% endif %}
+                                        {% endblock %}
+                                    </h4>
+                                </div>
+                                <!-- Card body -->
+                            <!-- Dismissing alert -->
+                                <div class="card-body row">
+                                     <div class="alert alert-danger d-flex align-items-center d-none" id="text-alerta" role="alert">
+                                          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-exclamation-triangle-fill me-2" viewBox="0 0 16 16">
+                                             <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+                                          </svg>
+                                          <div id="message_top">
+                                          </div>
+                                     </div>
+                                    {% for item in form %}
+                                        <div class="col-12 col-lg-{% if item.field.widget.attrs.col %}{{ item.field.widget.attrs.col }}{% else %}12{% endif %} mb-2">
+                                            <label for="courseTitle" class="form-label mb-1">{{ item.label }}:</label>
+                                            {% if item.field.widget.attrs.editor %}
+                                                <input type="hidden" id="id_{{ item.name }}" name="{{ item.name }}" value="{{ item.value }}">
+                                                <div class="miEditor" id="editor_{{ item.name }}" style="min-height: 10rem"></div>
+                                            {% elif item.field.widget.attrs.switch and item.widget_type == 'checkbox'%}
+                                                <span class="form-check form-switch form-switch-price">
+                                                    {{ item }}
+                                                </span>
+                                            {% else %}
+                                                {{ item }}
+                                            {% endif %}
+                                            <div class="ps-1">
+                                                 <p class="lh-2"><small>{{ item.help_text }}</small></p>
+                                                 <small><p class="lh-2 text-danger errorField" id="errorField{{ item.name }}"></p></small>
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                                <div class="card-footer text-end">
+                                    <button type="submit" class="btn btn-success rounded-pill btn-xs" id="submit"><i class="fas fa-check-circle"></i> Guardar</button>
+                                    <a href="javascript:void(0);" class="btn btn-secondary rounded-pill btn-xs" id="id_cancelar"><i class="bi bi-arrow-bar-left"></i> Volver</a>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

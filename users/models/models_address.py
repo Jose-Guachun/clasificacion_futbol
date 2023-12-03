@@ -68,23 +68,3 @@ class Ciudad(ModeloBase):
         self.nombre = self.nombre.upper()
         self.nombre_st = slugify(self.nombre).replace('-', ' ')
         super(Ciudad, self).save(force_insert, force_update, using)
-
-
-
-class Parroquia(ModeloBase):
-    ciudad = models.ForeignKey(Ciudad, on_delete=models.PROTECT, null=True, blank=True)
-    codigo = models.CharField(max_length=200, verbose_name='Código de parroquia', blank=True, null=True)
-    nombre = models.CharField(max_length=200, verbose_name='Parroquia')
-
-    def __str__(self):
-        return "{}, {}".format(self.nombre, self.ciudad.nombre)
-
-    class Meta:
-        verbose_name = 'Parroquia'
-        verbose_name_plural = 'Parroquias'
-        ordering = ('nombre',)
-
-    def save(self, force_insert=False, force_update=False, using=None, **kwargs):
-        self.nombre = self.nombre.upper()
-        self.nombre_st = slugify(self.nombre).replace('-', ' ')
-        super(Parroquia, self).save(force_insert, force_update, using)

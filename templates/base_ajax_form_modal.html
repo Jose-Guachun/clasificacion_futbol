@@ -1,0 +1,48 @@
+{% load extra_tags %}
+{% load static %}
+<input type="hidden" name="id" value="{{ id|encrypt }}"/>
+<input type="hidden" name="action" value="{{ action }}"/>
+{% block header_modal %}{% endblock %}
+<div class="alert alert-danger d-flex align-items-center d-none" id="text-alerta" role="alert">
+    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor"
+         class="bi bi-exclamation-triangle-fill me-2" viewBox="0 0 16 16">
+        <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+    </svg>
+    <div id="message_top">
+    </div>
+</div>
+{% for item in form %}
+    <div class="col-12 col-lg-{% if item.field.widget.attrs.col %}{{ item.field.widget.attrs.col }}{% else %}12{% endif %} mb-2">
+        <label for="courseTitle" class="form-label mb-1"><i class="{{ item.field.widget.attrs.icon }}" id="icon_{{ item.name }}"></i> {{ item.label }}:</label>
+        {% if item.field.widget.attrs.editor %}
+            <input type="hidden" id="id_{{ item.name }}" name="{{ item.name }}">
+            <div class="miEditor" id="editor_{{ item.name }}" style="min-height: 10rem"></div>
+        {% elif item.field.widget.attrs.switch and item.widget_type == 'checkbox' %}
+            <span class="form-check form-switch form-switch-price">
+                {{ item }}
+            </span>
+        {% elif item.widget_type == 'select' and not item.field.widget.attrs.select2 %}
+            <div class="dropdown bootstrap-select" style="width: 100%;">
+                {{ item }}
+            </div>
+        {% else %}
+            {{ item }}
+        {% endif %}
+        <p class="lh-1"><small>{{ item.help_text }}</small></p>
+        <p class="lh-1"><small class="text-danger" id="errorField{{ item.name }}"></small></p>
+    </div>
+{% endfor %}
+{% block extra_input_modal %}{% endblock %}
+{% block footer_modal %}
+    <div class="col-12 text-center mt-4">
+        <button type="submit" id="submit" class="btn btn-success rounded-pill btn-xs bloqueo"><i class="fas fa-check-circle"></i>
+        Guardar
+    </button>
+        <a href="javascript:void(0);" class="btn btn-secondary rounded-pill btn-xs" data-bs-dismiss="modal" ><i
+            class="fa fa-times-circle"></i> Cerrar</a>
+    </div>
+{% endblock %}
+<script type="text/javascript" src="{% static 'js/formquestion.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/validators.js' %}"></script>
+{% block extra_js_modal %}{% endblock %}
+
