@@ -17,12 +17,13 @@ SEXO = (
 PERFIL_USUARIO = (
     (0, 'Sin perfil'),
     (1, 'Administrador'),
-    (2, 'Asistente'),
-    (3, 'Registrador'),
+    (2, 'Secretario'),
+    (3, 'Asistente'),
+    (4, 'Cliente'),
 )
 
 class Persona(ModeloBase):
-    usuario = models.ForeignKey(User, null=True, on_delete=models.CASCADE)
+    usuario = models.ForeignKey(User, null=True, blank=True,  on_delete=models.CASCADE)
     perfil = models.IntegerField(choices=PERFIL_USUARIO, default=0, verbose_name=u'Tipo de usuario')
     nombres = models.CharField(default='', max_length=100, verbose_name=u'Nombre')
     apellido1 = models.CharField(default='', max_length=50, verbose_name=u"1er Apellido")
@@ -39,10 +40,7 @@ class Persona(ModeloBase):
     provincia = models.ForeignKey(Provincia, blank=True, null=True, related_name='+',verbose_name=u"Provincia de residencia", on_delete=models.CASCADE)
     ciudad = models.ForeignKey(Ciudad, blank=True, null=True, related_name='+', verbose_name=u"Ciudad de residencia", on_delete=models.CASCADE)
     direccion = models.CharField(default='', max_length=300, verbose_name=u"Calle principal")
-    direccion2 = models.CharField(default='', max_length=300, verbose_name=u"Calle secundaria")
-    num_direccion = models.CharField(default='', max_length=15, verbose_name=u"Numero")
-    referencia = models.CharField(default='', max_length=100, verbose_name=u"Referencia")
-    foto = models.ImageField(upload_to=ruta_foto, verbose_name=u'Foto',blank=True, null=True)
+    foto = models.ImageField(upload_to='users/foto', verbose_name=u'Foto',blank=True, null=True)
 
     def __str__(self):
         return self.nombres_completos_inverso()
@@ -83,15 +81,6 @@ class Persona(ModeloBase):
 
     def get_foto(self):
         return self.foto.url if self.foto else ''
-
-    def mis_perfilesusuarios(self):
-        return self.perfilusuario_set.filter(status=True,activo=True)
-
-    def mi_perfil_principal(self):
-        perfiles_p=self.mis_perfilesusuarios().filter(perfilprincipal=True)
-        if perfiles_p.exists():
-            return perfiles_p.first()
-        return self.mis_perfilesusuarios().first()
 
     def to_dict(self):
         persona_dict=model_to_dict(self)

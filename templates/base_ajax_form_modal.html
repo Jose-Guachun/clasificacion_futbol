@@ -1,7 +1,13 @@
 {% load extra_tags %}
 {% load static %}
 <input type="hidden" name="id" value="{{ id|encrypt }}"/>
+<input type="hidden" name="idp" value="{{ idp|encrypt }}"/>
 <input type="hidden" name="action" value="{{ action }}"/>
+<style>
+      .select2-container--open .select2-dropdown {
+            z-index: 1070;
+        }
+</style>
 {% block header_modal %}{% endblock %}
 <div class="alert alert-danger d-flex align-items-center d-none" id="text-alerta" role="alert">
     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor"
@@ -11,27 +17,29 @@
     <div id="message_top">
     </div>
 </div>
-{% for item in form %}
-    <div class="col-12 col-lg-{% if item.field.widget.attrs.col %}{{ item.field.widget.attrs.col }}{% else %}12{% endif %} mb-2">
-        <label for="courseTitle" class="form-label mb-1"><i class="{{ item.field.widget.attrs.icon }}" id="icon_{{ item.name }}"></i> {{ item.label }}:</label>
-        {% if item.field.widget.attrs.editor %}
-            <input type="hidden" id="id_{{ item.name }}" name="{{ item.name }}">
-            <div class="miEditor" id="editor_{{ item.name }}" style="min-height: 10rem"></div>
-        {% elif item.field.widget.attrs.switch and item.widget_type == 'checkbox' %}
-            <span class="form-check form-switch form-switch-price">
+{% block section_form %}
+    {% for item in form %}
+        <div class="col-12 col-lg-{% if item.field.widget.attrs.col %}{{ item.field.widget.attrs.col }}{% else %}12{% endif %} mb-2">
+            <label for="courseTitle" class="form-label mb-1"><i class="{{ item.field.widget.attrs.icon }}" id="icon_{{ item.name }}"></i> {{ item.label }}:</label>
+            {% if item.field.widget.attrs.editor %}
+                <input type="hidden" id="id_{{ item.name }}" name="{{ item.name }}">
+                <div class="miEditor" id="editor_{{ item.name }}" style="min-height: 10rem"></div>
+            {% elif item.field.widget.attrs.switch and item.widget_type == 'checkbox' %}
+                <span class="form-check form-switch form-switch-price">
                 {{ item }}
             </span>
-        {% elif item.widget_type == 'select' and not item.field.widget.attrs.select2 %}
-            <div class="dropdown bootstrap-select" style="width: 100%;">
+            {% elif item.widget_type == 'select' and not item.field.widget.attrs.select2 %}
+                <div class="dropdown bootstrap-select" style="width: 100%;">
+                    {{ item }}
+                </div>
+            {% else %}
                 {{ item }}
-            </div>
-        {% else %}
-            {{ item }}
-        {% endif %}
-        <p class="lh-1"><small>{{ item.help_text }}</small></p>
-        <p class="lh-1"><small class="text-danger" id="errorField{{ item.name }}"></small></p>
-    </div>
-{% endfor %}
+            {% endif %}
+            <p class="lh-1"><small>{{ item.help_text }}</small></p>
+            <p class="lh-1"><small class="text-danger" id="errorField{{ item.name }}"></small></p>
+        </div>
+    {% endfor %}
+{% endblock %}
 {% block extra_input_modal %}{% endblock %}
 {% block footer_modal %}
     <div class="col-12 text-center mt-4">
@@ -42,6 +50,48 @@
             class="fa fa-times-circle"></i> Cerrar</a>
     </div>
 {% endblock %}
+<script>
+    $(function () {
+        $('select').select2({width: '100%', minimumResultsForSearch: 6})
+        {#$("#contentForm .select2").select2({width: '100%', placeholder: 'Seleccione una opción...', minimumResultsForSearch: 15})#}
+
+    });
+
+    function cargarSelectSecundario(action, objeto_p, objeto_s, url) {
+        objeto_p.on("select2:select", function (evt) {
+            // Realizar la consulta AJAX utilizando el valor seleccionado
+            cargarLista(action, objeto_p, objeto_s, '', '', url)
+        });
+    }
+
+    // Codependiente para cargar select secundario
+    function cargarLista(action, objeto_p, objeto_s, id = '', args = '', url = '{{ request.path }}') {
+        bloqueointerface()
+        let value = objeto_p.val();
+        $.ajax({
+            url: url,
+            type: 'GET',
+            data: {'id': value, 'action': action, 'args': args},
+            success: function (response) {
+                $.unblockUI();
+                // Limpiar el select secundario
+                objeto_s.empty();
+
+                // Llenar el select secundario con las opciones de la respuesta de la consulta AJAX
+                $.each(response.data, function (index, option) {
+                    objeto_s.append($('<option>').text(option.text).val(option.value));
+                });
+
+                // Actualizar el select secundario con las nuevas opciones
+                objeto_s.val(id).trigger('change');
+            },
+            error: function (xhr, status, error) {
+                $.unblockUI();
+                // Manejar el error de la consulta AJAX si es necesario
+            }
+        });
+    }
+</script>
 <script type="text/javascript" src="{% static 'js/formquestion.js' %}"></script>
 <script type="text/javascript" src="{% static 'js/validators.js' %}"></script>
 {% block extra_js_modal %}{% endblock %}

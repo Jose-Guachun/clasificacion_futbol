@@ -1,8 +1,19 @@
+from datetime import datetime
+
 from django.core.paginator import Paginator
 from django.db.models import Q
 from unidecode import unidecode
 
 from django.contrib.auth.models import User
+
+
+def generar_nombre_file(name, nombreoriginal):
+    ext = ""
+    if nombreoriginal.find(".") > 0:
+        ext = nombreoriginal[nombreoriginal.rfind("."):]
+    fecha = datetime.now().date()
+    hora = datetime.now().time()
+    return name + fecha.year.__str__() + fecha.month.__str__() + fecha.day.__str__() + hora.hour.__str__() + hora.minute.__str__() + hora.second.__str__() + ext.lower()
 
 
 def filtro_persona_generico(filtro, search):
@@ -23,6 +34,7 @@ def filtro_persona_generico(filtro, search):
                            (Q(persona__nombres__contains=s[0]) & Q(persona__nombres__contains=s[1]) & Q(persona__apellido1__contains=s[2])))
     return filtro
 
+
 def filtro_persona_generico_principal(filtro, search):
     q = search.upper().strip()
     s = q.split(" ")
@@ -40,6 +52,7 @@ def filtro_persona_generico_principal(filtro, search):
         filtro = filtro & ((Q(nombres__contains=s[0]) & Q(apellido1__contains=s[1]) & Q(apellido2__contains=s[2])) |
                            (Q(nombres__contains=s[0]) & Q(nombres__contains=s[1]) & Q(apellido1__contains=s[2])))
     return filtro
+
 
 def generar_username(nombres, apellido1, apellido2):
     username = nombres[0] + apellido1 + apellido2[0]

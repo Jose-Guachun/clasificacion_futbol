@@ -1,0 +1,10 @@
+{% extends 'base_ajax_form_modal.html' %}
+{% block extra_js_modal %}
+    <script>
+        $(function (){
+            let club = $("#id_club")
+            let integrante = $("#id_integrante").select2({placeholder:'Seleccione un integrante',width:'100%'})
+            cargarSelectSecundario('cargarintegrantes',club, integrante)
+        })
+    </script>
+{% endblock %}

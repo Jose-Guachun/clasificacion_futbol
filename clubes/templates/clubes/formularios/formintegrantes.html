@@ -1,0 +1,48 @@
+{% extends 'base_ajax_form.html' %}
+{% load extra_tags %}
+{% block heading_1 %}
+
+{% endblock %}
+{% block extra_js_1 %}
+    <script>
+        $(function (){
+            let pais = $("#id_pais")
+            let provincia = $("#id_provincia")
+            let ciudad = $("#id_ciudad")
+            {% if not integrante or not integrante.rol == 1 %}
+                $("#col_tipojugador").hide()
+            {% endif %}
+            $("#id_cedula").change(function (){
+                console.log('hola')
+                $("#errorFieldcedula").text('')
+                let validar=validarCedula(this.value)
+                if (!validar){
+                    $("#errorFieldcedula").text("Cédula incorrecta")
+                }
+            })
+            $("#id_rol").on('change', function (){
+                if ($(this).val()==1){
+                    $("#col_tipojugador").show()
+                     $("#id_tipojugador").attr('required',true)
+                }else{
+                    $("#col_tipojugador").hide()
+                    $("#id_tipojugador").attr('required',false)
+                }
+            })
+            provincia.change(function (){
+                ciudad.empty()
+            })
+            cargarSelectSecundario('cargarprovincias',pais,provincia,'/api')
+            cargarSelectSecundario('cargarciudades',provincia,ciudad,'/api')
+        });
+    </script>
+{% endblock %}
+{% block url_atras %}{{ request.path }}?action=integrantes&id={{ club.id|encrypt }}{% endblock %}
+{% block enlaces_top %}
+    <li class="breadcrumb-item"><a href="{{ request.path }}">Clubes ({{ club|title_cap }})</a></li>
+    <li class="breadcrumb-item"><a href="{{ request.path }}?action=integrantes&id={{ club.id|encrypt }}">Integrantes</a></li>
+    <li class="breadcrumb-item">{{ title }}</li>
+{% endblock %}
+{% block head_title %}
+    {{ title }} de club ({{ club|title_cap }})
+{% endblock %}

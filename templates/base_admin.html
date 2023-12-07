@@ -24,7 +24,7 @@
     <div id="db-wrapper">
         <!-- navbar vertical -->
         <!-- Sidebar -->
-        <nav class="navbar-vertical navbar navbar-dark bg-dark">
+        <nav class="navbar-vertical navbar navbar-dark bg-blue">
             <div class="vh-100" data-simplebar>
                 <!-- Brand logo -->
                 <a class="navbar-brand bloqueo" href="{% url 'users:home' %}">
@@ -49,23 +49,18 @@
                     <li class="nav-item">
                         <a class="nav-link bloqueo {% if viewactivo == 'clubes' %}active{% endif %}" href="{% url 'clubes:gestion_clubes' %}">
                             <i class="nav-icon mdi fa-brands fa-hubspot me-2"></i>
-                            Clubes
+                            Equipos
                         </a>
                     </li>
                     <!-- Nav item -->
                     <li class="nav-item">
-                        <a class="nav-link " href="mail.html">
-                            <i class="nav-icon fas fa-futbol me-2"></i>
-                            Partidos
+                        <a class="nav-link bloqueo {% if viewactivo == 'partidos' %}active{% endif %}" href="{% url 'clubes:gestion_clubes' %}?action=torneos">
+                            <i class="nav-icon fas fa-trophy me-2"></i>
+                            Torneos
                         </a>
                     </li>
                     <!-- Nav item -->
-                    <li class="nav-item">
-                        <a class="nav-link " href="calendar.html">
-                            <i class="nav-icon mdi mdi-calendar me-2"></i>
-                            Planificaciones
-                        </a>
-                    </li>
+
                     <li class="nav-item">
                         <div class="nav-divider"></div>
                     </li>
@@ -86,77 +81,77 @@
 
                     <!--Navbar nav -->
                     <ul class="navbar-nav navbar-right-wrap ms-auto d-flex nav-top-wrap">
-                        <li class="dropdown stopevent">
-                            <a class="btn btn-light btn-icon rounded-circle indicator indicator-primary text-muted"
-                               href="#" role="button" id="dropdownNotification" data-bs-toggle="dropdown"
-                               aria-haspopup="true" aria-expanded="false">
-                                <i class="fe fe-bell"></i>
-                            </a>
-                            <div class="dropdown-menu dropdown-menu-end dropdown-menu-lg"
-                                 aria-labelledby="dropdownNotification">
-                                <div class=" ">
-                                    <div class="border-bottom px-3 pb-3 d-flex justify-content-between align-items-center">
-                                        <span class="h4 mb-0">Notificaciones</span>
-                                        <a href="# " class="text-muted">
-                                        <span class="align-middle">
-                                        <i class="fe fe-settings me-1"></i>
-                                    </span>
-                                        </a>
-                                    </div>
-                                    <!-- List group -->
-                                    <ul class="list-group list-group-flush" data-simplebar style="max-height: 300px;">
-                                        <li class="list-group-item bg-light">
-                                            <div class="row">
-                                                <div class="col">
-                                                    <a class="text-body" href="#">
-                                                        <div class="d-flex">
-                                                            {{ persona.get_avatar_img_md|safe }}
-                                                            <div class="ms-3">
-                                                                <h5 class="fw-bold mb-1">Kristin Watson:</h5>
-                                                                <p class="mb-3">
-                                                                    Notificación a mostrar
-                                                                </p>
-                                                                <span class="fs-6 text-muted">
-                                                                    <span>
-                                                                        <span class="fe fe-thumbs-up text-success me-1"></span>
-                                                                        <span class="fe fe-award text-warning me-1"></span>
-                                                                        hace 2 horas,
-                                                                    </span>
-                                                                    <span class="ms-1">2:19 PM</span>
-                                                                    <span class="ms-1">Oct, 1:56 PM</span>
-                                                                </span>
-                                                            </div>
-                                                        </div>
-                                                    </a>
-                                                </div>
-                                                <div class="col-auto text-center me-2">
-                                                    <a href="#"
-                                                        class="badge-dot bg-info"
-                                                        data-bs-toggle="tooltip"
-                                                        data-bs-placement="top"
-                                                        title="Marcar como leído">
-                                                    </a>
-                                                    <div>
-                                                        <a href="#"
-                                                            class="bg-transparent"
-                                                            data-bs-toggle="tooltip"
-                                                            data-bs-placement="top"
-                                                            title="Eliminar">
-                                                            <i class="fe fe-x text-muted"></i>
-                                                        </a>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </li>
-                                    </ul>
-                                    <div class="border-top px-3 pt-3 pb-0 text-center">
-                                        <a href="../notification-history.html" class="text-link fw-semi-bold">
-                                           <i class="fas fa-bell"></i> Ver todas las notificaciones
-                                        </a>
-                                    </div>
-                                </div>
-                            </div>
-                        </li>
+{#                        <li class="dropdown stopevent">#}
+{#                            <a class="btn btn-light btn-icon rounded-circle indicator indicator-primary text-muted"#}
+{#                               href="#" role="button" id="dropdownNotification" data-bs-toggle="dropdown"#}
+{#                               aria-haspopup="true" aria-expanded="false">#}
+{#                                <i class="fe fe-bell"></i>#}
+{#                            </a>#}
+{#                            <div class="dropdown-menu dropdown-menu-end dropdown-menu-lg"#}
+{#                                 aria-labelledby="dropdownNotification">#}
+{#                                <div class=" ">#}
+{#                                    <div class="border-bottom px-3 pb-3 d-flex justify-content-between align-items-center">#}
+{#                                        <span class="h4 mb-0">Notificaciones</span>#}
+{#                                        <a href="# " class="text-muted">#}
+{#                                        <span class="align-middle">#}
+{#                                        <i class="fe fe-settings me-1"></i>#}
+{#                                    </span>#}
+{#                                        </a>#}
+{#                                    </div>#}
+{#                                    <!-- List group -->#}
+{#                                    <ul class="list-group list-group-flush" data-simplebar style="max-height: 300px;">#}
+{#                                        <li class="list-group-item bg-light">#}
+{#                                            <div class="row">#}
+{#                                                <div class="col">#}
+{#                                                    <a class="text-body" href="#">#}
+{#                                                        <div class="d-flex">#}
+{#                                                            {{ persona.get_avatar_img_md|safe }}#}
+{#                                                            <div class="ms-3">#}
+{#                                                                <h5 class="fw-bold mb-1">Kristin Watson:</h5>#}
+{#                                                                <p class="mb-3">#}
+{#                                                                    Notificación a mostrar#}
+{#                                                                </p>#}
+{#                                                                <span class="fs-6 text-muted">#}
+{#                                                                    <span>#}
+{#                                                                        <span class="fe fe-thumbs-up text-success me-1"></span>#}
+{#                                                                        <span class="fe fe-award text-warning me-1"></span>#}
+{#                                                                        hace 2 horas,#}
+{#                                                                    </span>#}
+{#                                                                    <span class="ms-1">2:19 PM</span>#}
+{#                                                                    <span class="ms-1">Oct, 1:56 PM</span>#}
+{#                                                                </span>#}
+{#                                                            </div>#}
+{#                                                        </div>#}
+{#                                                    </a>#}
+{#                                                </div>#}
+{#                                                <div class="col-auto text-center me-2">#}
+{#                                                    <a href="#"#}
+{#                                                        class="badge-dot bg-info"#}
+{#                                                        data-bs-toggle="tooltip"#}
+{#                                                        data-bs-placement="top"#}
+{#                                                        title="Marcar como leído">#}
+{#                                                    </a>#}
+{#                                                    <div>#}
+{#                                                        <a href="#"#}
+{#                                                            class="bg-transparent"#}
+{#                                                            data-bs-toggle="tooltip"#}
+{#                                                            data-bs-placement="top"#}
+{#                                                            title="Eliminar">#}
+{#                                                            <i class="fe fe-x text-muted"></i>#}
+{#                                                        </a>#}
+{#                                                    </div>#}
+{#                                                </div>#}
+{#                                            </div>#}
+{#                                        </li>#}
+{#                                    </ul>#}
+{#                                    <div class="border-top px-3 pt-3 pb-0 text-center">#}
+{#                                        <a href="../notification-history.html" class="text-link fw-semi-bold">#}
+{#                                           <i class="fas fa-bell"></i> Ver todas las notificaciones#}
+{#                                        </a>#}
+{#                                    </div>#}
+{#                                </div>#}
+{#                            </div>#}
+{#                        </li>#}
                         <!-- List -->
                         <li class="dropdown ms-2">
                             <a class="rounded-circle" href="#" role="button" id="dropdownUser" data-bs-toggle="dropdown"
@@ -174,25 +169,25 @@
                                     </div>
                                 </div>
                                 <div class="dropdown-divider"></div>
-                                <ul class="list-unstyled">
+{#                                <ul class="list-unstyled">#}
 
-                                    <li>
-                                        <a class="dropdown-item" href="../profile-edit.html">
-                                            <i class="fe fe-user me-2"></i> Perfil
-                                        </a>
-                                    </li>
+{#                                    <li>#}
+{#                                        <a class="dropdown-item" href="../profile-edit.html">#}
+{#                                            <i class="fe fe-user me-2"></i> Perfil#}
+{#                                        </a>#}
+{#                                    </li>#}
 {#                                    <li>#}
 {#                                        <a class="dropdown-item" href="../student-subscriptions.html">#}
 {#                                            <i class="fe fe-star me-2"></i> Subscription#}
 {#                                        </a>#}
 {#                                    </li>#}
-                                    <li>
-                                        <a class="dropdown-item" href="#">
-                                            <i class="fe fe-settings me-2"></i> Configurar cuenta
-                                        </a>
-                                    </li>
-                                </ul>
-                                <div class="dropdown-divider"></div>
+{#                                    <li>#}
+{#                                        <a class="dropdown-item" href="#">#}
+{#                                            <i class="fe fe-settings me-2"></i> Configurar cuenta#}
+{#                                        </a>#}
+{#                                    </li>#}
+{#                                </ul>#}
+{#                                <div class="dropdown-divider"></div>#}
                                 <ul class="list-unstyled">
                                     <li>
                                         <a class="dropdown-item" href="{% url 'users:logout' %}">

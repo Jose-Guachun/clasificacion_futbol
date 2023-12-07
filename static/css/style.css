@@ -78,3 +78,10 @@
 .capitalize {
 	text-transform: capitalize;
 }
+
+.btn-primary-old{
+	background-color:  #1476b8;
+	border-color:  #1476b8;
+	color: white;
+	padding: 20px;
+}

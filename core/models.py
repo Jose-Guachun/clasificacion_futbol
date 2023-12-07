@@ -6,7 +6,7 @@ from clasificacion_futbol.settings import ADMINISTRADOR_ID
 from django.contrib.auth.models import User
 
 MANAGERS = (
-    ('jose', 'jose1@gmail.com'),
+    ('jguachuns', 'jose@gmail.com'),
 )
 
 class ModeloBase(models.Model):

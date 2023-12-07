@@ -1,0 +1,10 @@
+{% extends 'base_ajax_form_modal.html' %}
+{% block extra_js_modal %}
+    <script>
+        $(function (){
+            let tipopartido = $("#id_tipopartido")
+            let tipopartidofase = $("#id_tipopartidofase")
+            cargarSelectSecundario('cargarfases',tipopartido, tipopartidofase)
+        })
+    </script>
+{% endblock %}

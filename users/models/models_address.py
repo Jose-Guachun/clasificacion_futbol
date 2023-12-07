@@ -12,6 +12,9 @@ class Pais(ModeloBase):
     def __str__(self):
         return u'%s' % self.nombre
 
+    def provincias(self):
+        return self.provincia_set.filter(status=True)
+
     class Meta:
         verbose_name = u"País"
         verbose_name_plural = u"Paises"
@@ -34,6 +37,9 @@ class Provincia(ModeloBase):
 
     def __str__(self):
         return u'%s' % self.nombre
+
+    def ciudades(self):
+        return self.ciudad_set.filter(status=True)
 
     class Meta:
         verbose_name = u"Provincia"

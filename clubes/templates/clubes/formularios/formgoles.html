@@ -1,0 +1,36 @@
+{% extends 'base_ajax_form_modal.html' %}
+{% load extra_tags %}
+{% block section_form %}
+    <div class="col-12 mt-2">
+        <div class="row">
+             <div class="col-12 col-md-9 ">
+                <h5><i class="fa fa-users dropdown-item-icon"></i>Equipos</h5>
+            </div>
+            <div class="col-12 col-md-3 text-center">
+                <h5><i class="fa fa-futbol dropdown-item-icon"></i>Goles</h5>
+            </div>
+        </div>
+        <div class="row mt-2">
+            <div class="col-12 col-md-9">
+                <h5>{{ partido.clublocal.get_escudo_img_sm|safe }}
+                    {{ partido.clublocal|title_cap }}
+                </h5>
+            </div>
+            <div class="col-12 col-md-3">
+                <input type="number" name="goleslocal" class="form-control text-center w-100 soloNumeros" value="{{ partido.goleslocal }}" min="0"
+                       required>
+            </div>
+        </div>
+        <div class="row mt-2">
+            <div class="col-12 col-md-9">
+                <h5>{{ partido.clubvisitante.get_escudo_img_sm|safe }}
+                    {{ partido.clubvisitante|title_cap }}
+                </h5>
+            </div>
+            <div class="col-12 col-md-3">
+                <input type="number" name="golesvisitante" class="form-control text-center w-100 soloNumeros" value="{{ partido.golesvisitante }}" min="0"
+                       required>
+            </div>
+        </div>
+    </div>
+{% endblock %}

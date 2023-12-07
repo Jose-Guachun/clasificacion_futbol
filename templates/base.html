@@ -207,6 +207,46 @@
             }
         })
     }
+    function accionNotificar(pk, nombre, accion, titulo = '') {
+        Swal.fire({
+            html: `<b>${titulo}</b><p>${nombre}</p>`,
+            text: "Esta acción es irreversible",
+            icon: 'info',
+            showCancelButton: true,
+            allowOutsideClick: false,
+            confirmButtonText: 'Si, deseo hacerlo',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.value) {
+                $.ajax({
+                    type: 'POST',
+                    url: '{{ reques.path }}',
+                    async: false,
+                    data: {
+                        csrfmiddlewaretoken: '{{ csrf_token }}',
+                        action: accion,
+                        id: pk,
+                    },
+                    dataType: "json",
+                    beforeSend: function () {
+                        bloqueointerface();
+                    }
+                }).done(function (data) {
+                    setTimeout($.unblockUI, 1);
+                    if (data.result === true) {
+                        location.reload();
+                    }else{
+                        alertaDanger(data.mensaje)
+                    }
+                }).fail(function (jqXHR, textStatus, errorThrown) {
+                    setTimeout($.unblockUI, 1);
+                    alertaDanger('Error en el servidor', 10000)
+                }).always(function () {
+                });
+            } else {
+            }
+        })
+    }
 </script>
 
 <!----- CONTENEDOR PARA JS EXTRA ------>

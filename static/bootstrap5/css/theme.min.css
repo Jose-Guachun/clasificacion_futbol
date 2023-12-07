@@ -3213,7 +3213,8 @@ progress {
     font-size: .875rem;
     font-weight: 400;
     line-height: 1.6;
-    padding: .75rem 1.25rem;
+    /*padding: .75rem 1.25rem;*/
+    padding: .5rem 1rem;
     transition: border-color .15s ease-in-out, box-shadow .15s ease-in-out;
     width: 100%
 }
@@ -4048,7 +4049,7 @@ textarea.form-control-lg {
     font-size: .875rem;
     font-weight: 600;
     line-height: 1.6;
-    padding: .75rem 1.25rem;
+    padding: .55rem 1.05rem;
     text-align: center;
     transition: color .15s ease-in-out, background-color .15s ease-in-out, border-color .15s ease-in-out, box-shadow .15s ease-in-out;
     -webkit-user-select: none;
@@ -4079,14 +4080,14 @@ textarea.form-control-lg {
 }
 
 .btn-primary {
-    background-color: #754ffe;
-    border-color: #754ffe;
+    background-color: #4f64fe;
+    border-color: #4f64fe;
     color: #fff
 }
 
 .btn-check:focus + .btn-primary, .btn-primary:focus, .btn-primary:hover {
-    background-color: #6343d8;
-    border-color: #5e3fcb;
+    background-color: #3f54ec;
+    border-color: #3f54ec;
     color: #fff
 }
 
@@ -6880,8 +6881,8 @@ textarea.form-control-lg {
 }
 
 .page-link:hover {
-    background-color: #754ffe;
-    border-color: #754ffe;
+    background-color: #094363;
+    border-color: #094363;
     color: #fff;
     z-index: 2
 }
@@ -6899,8 +6900,8 @@ textarea.form-control-lg {
 }
 
 .page-item.active .page-link {
-    background-color: #754ffe;
-    border-color: #754ffe;
+    background-color: #052435;
+    border-color: #052435;
     color: #fff;
     z-index: 3
 }
@@ -9701,6 +9702,10 @@ textarea.form-control-lg {
 
 .border-6 {
     border-width: 6px !important
+}
+
+.w-3 {
+    width: 2% !important
 }
 
 .w-5 {
@@ -12735,6 +12740,10 @@ textarea.form-control-lg {
 .bg-white {
     --bs-bg-opacity: 1;
     background-color: #fff !important
+}
+.bg-blue {
+    --bs-bg-opacity: 1;
+    background-color: #052435 !important
 }
 
 .bg-light-primary {
@@ -28382,7 +28391,7 @@ textarea.form-control-lg {
 }
 
 .navbar-default .navbar-nav .nav-item .nav-link {
-    color: #18113c;
+    color: #fafafa;
     font-size: .875rem;
     font-weight: 500;
     padding: .3125rem .5rem
@@ -28945,8 +28954,8 @@ textarea.form-control-lg {
 .table thead th {
     font-size: .75rem;
     font-weight: 600;
-    letter-spacing: 1px;
-    text-transform: uppercase
+    letter-spacing: .5px;
+    /*text-transform: uppercase*/
 }
 
 .table-light th {

@@ -1,7 +1,8 @@
 from users.models import Persona, User
 from django.db import transaction
 
-from core.funciones import generar_username, generar_password
+from core.funciones import generar_username, generar_password, generar_nombre_file
+
 
 def cargar_inputs(form):
     context = {}
@@ -19,109 +20,102 @@ def cargar_inputs(form):
     context['tipoprofesor'] = form.cleaned_data['tipoprofesor'] if 'tipoprofesor' in form.cleaned_data else None
     context['fechaingreso'] = form.cleaned_data['fechaingreso'] if 'fechaingreso' in form.cleaned_data else None
     context['activo'] = form.cleaned_data['activo'] if 'activo' in form.cleaned_data else None
-    context['perfil'] = form.cleaned_data['perfil'] if 'perfil' in form.cleaned_data else None
+    context['perfil'] = form.cleaned_data['perfil'] if 'perfil' in form.cleaned_data else 0
+    context['direccion'] = form.cleaned_data['direccion'] if 'direccion' in form.cleaned_data else ''
+    context['pais'] = form.cleaned_data['pais'] if 'pais' in form.cleaned_data else None
+    context['provincia'] = form.cleaned_data['provincia'] if 'provincia' in form.cleaned_data else None
+    context['ciudad'] = form.cleaned_data['ciudad'] if 'ciudad' in form.cleaned_data else None
+    context['foto'] = form.cleaned_data['foto'] if 'foto' in form.cleaned_data else None
     return context
 
-def add_user_with_profile(request, form, perfil=None, password=None, persona=None):
+
+def add_user_with_profile(request, form, perfil=0, password=None, persona=None):
     try:
         context = {}
-        data=cargar_inputs(form)
-        username=generar_username(data['nombres'], data['apellido1'], data['apellido2'])
-        password=generar_password(data['cedula'], data['apellido1'],data['apellido2']) if not password else password
-        user=User(first_name=data['nombres'], last_name=data['apellido1'], email=data['email'], username=username)
+        data = cargar_inputs(form)
+        perfil = perfil if perfil > 0 else data['perfil']
+        is_active = int(perfil) > 0
+        identificacion =data['cedula'] if data['cedula'] else data['pasaporte']
+        username = generar_username(data['nombres'], data['apellido1'], data['apellido2'])
+        password = generar_password(identificacion, data['apellido1'], data['apellido2']) if not password else password
+        user = User(first_name=data['nombres'], last_name=data['apellido1'], email=data['email'], username=username, is_active=is_active)
         user.set_password(password)
         user.save(request)
-        persona=Persona(usuario=user,
-                        nombres=data['nombres'],
-                        apellido1=data['apellido1'],
-                        apellido2=data['apellido2'],
-                        cedula=data['cedula'],
-                        pasaporte=data['pasaporte'],
-                        email=data['email'],
-                        celular=data['celular'],
-                        telefono=data['telefono'],
-                        sexo=data['sexo'],
-                        fecha_nacimiento=data['fecha_nacimiento'],
-                        perfil=perfil if perfil else data['perfil'],
-                        nacionalidad=data['nacionalidad'])
+        newfile = data['foto']
+        if newfile:
+            extension = newfile._name.split('.')
+            exte = extension[len(extension) - 1]
+            if newfile.size > 2194304:
+                raise NameError(u"El tamaño del archivo es mayor a 2 Mb.")
+            if not exte.lower() in ['png', 'jpg', 'jpeg']:
+                raise NameError(u"Solo se permite archivos de formato .png, .jpg, .jpeg")
+            newfile._name = generar_nombre_file(f'escudo', newfile._name)
+
+        persona = Persona(usuario=user,
+                          nombres=data['nombres'],
+                          apellido1=data['apellido1'],
+                          apellido2=data['apellido2'],
+                          cedula=data['cedula'],
+                          pasaporte=data['pasaporte'],
+                          email=data['email'],
+                          celular=data['celular'],
+                          telefono=data['telefono'],
+                          sexo=data['sexo'],
+                          fecha_nacimiento=data['fecha_nacimiento'],
+                          perfil=perfil,
+                          direccion=data['direccion'],
+                          pais=data['pais'],
+                          ciudad=data['ciudad'],
+                          provincia=data['provincia'],
+                          foto=newfile,
+                          nacionalidad=data['nacionalidad'])
         persona.save(request)
         context['id_persona'] = persona.id
-        # if tipoperfil == 'docente':
-        #     profesor=Profesor(persona=persona,tipoprofesor=data['tipoprofesor'], fechaingreso=data['fechaingreso'])
-        #     if not data['activo'] is None:
-        #         profesor.activo = data['activo']
-        #     profesor.save(request)
-        #     perfil=PerfilUsuario(profesor=profesor, persona=persona, perfilprincipal=True)
-        #     perfil.save(request)
-        #     context['id_profesor']=profesor.id
-        # elif tipoperfil == 'administrativo':
-        #     administrativo = Administrativo(persona=persona, fechaingreso=data['fechaingreso'])
-        #     if not data['activo'] is None:
-        #         administrativo.activo = data['activo']
-        #     administrativo.save(request)
-        #     perfil = PerfilUsuario(administrativo=administrativo, persona=persona)
-        #     perfil.save(request)
-        #     context['id_administrativo']=administrativo.id
-        # elif tipoperfil == 'estudiante':
-        #     estudiante = Estudiante(persona=persona)
-        #     estudiante.save(request)
-        #     perfil = PerfilUsuario(estudiante=estudiante, persona=persona)
-        #     perfil.save(request)
-        #     context['id_estudiante']=estudiante.id
-        # context['id_perfil']=perfil.id
         return context
     except Exception as ex:
         transaction.set_rollback(True)
         raise NameError(str(ex))
 
-def edit_persona_with_profile(request, form, perfil=None, id_persona=None):
-    context={}
+
+def edit_persona_with_profile(request, form, perfil=0, id_persona=None):
+    context = {}
     data = cargar_inputs(form)
-    persona=Persona.objects.get(id=id_persona)
-    persona.nombres=data['nombres']
-    persona.apellido1=data['apellido1']
-    persona.apellido2=data['apellido2']
+    persona = Persona.objects.get(id=id_persona)
+    persona.nombres = data['nombres']
+    persona.apellido1 = data['apellido1']
+    persona.apellido2 = data['apellido2']
     if not form.instancia.cedula:
-        persona.cedula=data['cedula']
+        persona.cedula = data['cedula']
     if not form.instancia.pasaporte:
-        persona.pasaporte=data['pasaporte']
+        persona.pasaporte = data['pasaporte']
     # persona.email=data['email']
-    persona.celular=data['celular']
-    persona.telefono=data['telefono']
-    persona.sexo=data['sexo']
-    persona.fecha_nacimiento=data['fecha_nacimiento']
-    persona.nacionalidad=data['nacionalidad']
-    persona.perfil=perfil if perfil else data['perfil']
+    persona.celular = data['celular']
+    persona.telefono = data['telefono']
+    persona.sexo = data['sexo']
+    persona.fecha_nacimiento = data['fecha_nacimiento']
+    persona.nacionalidad = data['nacionalidad']
+    persona.perfil = int(perfil) if int(perfil) > 0 else data['perfil']
+    persona.direccion = data['direccion']
+    persona.pais = data['pais']
+    persona.provincia = data['provincia']
+    persona.ciudad = data['ciudad']
+    newfile = data['foto']
+    if newfile:
+        extension = newfile._name.split('.')
+        exte = extension[len(extension) - 1]
+        if newfile.size > 2194304:
+            raise NameError(u"El tamaño del archivo es mayor a 2 Mb.")
+        if not exte.lower() in ['png', 'jpg', 'jpeg']:
+            raise NameError(u"Solo se permite archivos de formato .png, .jpg, .jpeg")
+        newfile._name = generar_nombre_file(f'foto', newfile._name)
+        persona.foto=newfile
     persona.save(request)
     context['id_persona'] = persona.id
-    # if tipoperfil == 'docente':
-    #     profesor=Profesor.objects.get(persona=persona, status=True)
-    #     profesor.tipoprofesor = data['tipoprofesor']
-    #     if data['fechaingreso']:
-    #         profesor.fechaingreso = data['fechaingreso']
-    #     if not data['activo'] is None:
-    #         profesor.activo = data['activo']
-    #     profesor.save(request)
-    #     context['id_profesor']=profesor.id
-    # elif tipoperfil == 'administrativo':
-    #     administrativo = Administrativo.objects.get(persona=persona, status=True)
-    #     if data['fechaingreso']:
-    #         administrativo.fechaingreso=data['fechaingreso']
-    #     if not data['activo'] is None:
-    #         administrativo.activo = data['activo']
-    #     administrativo.save(request)
-    #     context['id_administrativo']=administrativo.id
-    # elif tipoperfil == 'estudiante':
-    #     estudiante = Estudiante.objects.get(persona=persona, status=True)
-    #     estudiante.save(request)
-    #     context['id_estudiante']=estudiante.id
     return context
 
-def gestionarusuario(request, form, object):
+
+def gestionarusuario(form, object):
     try:
-        #perfil_ = object.perfilusuario_set.get(status=True)
-        #perfil_.activo = form.cleaned_data['perfilactivo']
-        #perfil_.save(request)
         usuario_ = object.persona.usuario
         usuario_.is_active = form.cleaned_data['usuarioactivo']
         usuario_.save()

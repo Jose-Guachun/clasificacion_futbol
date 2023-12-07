@@ -28,27 +28,7 @@
         </div>
     </div>
     <div class="row">
-        <div class="col-xl-3 col-lg-6 col-md-12 col-12">
-            <!-- Card -->
-            <div class="card mb-4">
-                <!-- Card body -->
-                <div class="card-body">
-                    <div class="d-flex align-items-center justify-content-between mb-3 lh-1">
-                        <div>
-                            <span class="fs-6 text-uppercase fw-semi-bold">Planificaciones</span>
-                        </div>
-                        <div>
-                            <span class="fe fe-calendar fs-3 text-primary"></span>
-                        </div>
-                    </div>
-                    <h2 class="fw-bold mb-1">
-                        5
-                    </h2>
-                    <span class="text-success fw-semi-bold"><i class="fe fe-trending-up me-1"></i>2</span>
-                    <span class="ms-1 fw-medium">Ejecutadas</span>
-                </div>
-            </div>
-        </div>
+
         <div class="col-xl-3 col-lg-6 col-md-12 col-12">
             <!-- Card -->
             <div class="card mb-4">
@@ -63,9 +43,9 @@
                         </div>
                     </div>
                     <h2 class="fw-bold mb-1">
-                        15
+                        {{ partidos }}
                     </h2>
-                    <span class="text-danger fw-semi-bold">5</span>
+                    <span class="text-danger fw-semi-bold">{{ partidos_pendientes }}</span>
                     <span class="ms-1 fw-medium">Pendientes de jugar</span>
                 </div>
             </div>
@@ -84,9 +64,9 @@
                         </div>
                     </div>
                     <h2 class="fw-bold mb-1">
-                        10
+                        {{ equipos }}
                     </h2>
-                    <span class="text-success fw-semi-bold"><i class="fe fe-trending-up me-1"></i>80</span>
+                    <span class="text-success fw-semi-bold"><i class="fe fe-trending-up me-1"></i>{{ jugadores }}</span>
                     <span class="ms-1 fw-medium">Jugadores</span>
                 </div>
             </div>
@@ -105,9 +85,9 @@
                         </div>
                     </div>
                     <h2 class="fw-bold mb-1">
-                        2
+                        {{ usuarios }}
                     </h2>
-                    <span class="text-success fw-semi-bold"><i class="fe fe-trending-up me-1"></i>4</span>
+                    <span class="text-success fw-semi-bold"><i class="fe fe-trending-up me-1"></i>{{ administradores }}</span>
                     <span class="ms-1 fw-medium">Administradores</span>
                 </div>
             </div>

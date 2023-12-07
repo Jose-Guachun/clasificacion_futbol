@@ -9,28 +9,33 @@ from django.contrib.auth.models import User
 from users.models import Persona
 from core.validators import v_cedulaform, v_sololetrasform, v_solonumerosform
 
+
 def deshabilitar_campo(form, campo):
     form.fields[campo].widget.attrs['readonly'] = True
+
 
 def habilitar_campo(form, campo):
     form.fields[campo].widget.attrs['readonly'] = False
 
+
 def campo_solo_lectura(form, campo):
     form.fields[campo].widget.attrs['readonly'] = True
+
 
 class CustomDateInput(DateTimeBaseInput):
     def format_value(self, value):
         return str(value or '')
 
+class CustomTimeInput(forms.TimeInput):
+    input_type = 'time'
+
 class FormBase(forms.Form):
 
     def __init__(self, *args, **kwargs):
         self.ver = kwargs.pop('ver') if 'ver' in kwargs else False
-        self.editando = 'instance' in kwargs
+        self.instancia = kwargs.pop('instancia', None)
         no_requeridos = kwargs.pop('no_requeridos') if 'no_requeridos' in kwargs else []
         requeridos = kwargs.pop('requeridos') if 'requeridos' in kwargs else []
-        if self.editando:
-            self.instancia = kwargs['instance']
         super(FormBase, self).__init__(*args, **kwargs)
         for field in self.fields:
             self.fields[field].error_messages = {'required': f'Este campo es obligatorio'}
@@ -53,19 +58,24 @@ class FormBase(forms.Form):
                 # self.fields[k].input_formats = ['%d/%m/%Y']
             elif isinstance(field, forms.BooleanField):
                 if 'switch' in self.fields[k].widget.attrs:
-                    if 'class' in self.fields[k].widget.attrs :
+                    if 'class' in self.fields[k].widget.attrs:
                         self.fields[k].widget.attrs['class'] += " form-check-input"
                     else:
                         self.fields[k].widget.attrs['class'] = "form-check-input"
             elif isinstance(field, forms.ChoiceField) or isinstance(field, forms.ModelChoiceField) and self.fields[k].widget.input_type == 'select':
+                self.fields[k].widget.attrs['placeholder'] = f'Elige una opción'
                 if not 'select2' in self.fields[k].widget.attrs:
-                    self.fields[k].widget.attrs['placeholder'] = f'Elige una opción'
                     if 'class' in self.fields[k].widget.attrs:
                         self.fields[k].widget.attrs['class'] += " form-control selectpicker"
                     else:
                         self.fields[k].widget.attrs['class'] = "form-control selectpicker"
+                else:
+                    if 'class' in self.fields[k].widget.attrs:
+                        self.fields[k].widget.attrs['class'] += " form-control select2"
+                    else:
+                        self.fields[k].widget.attrs['class'] = "form-control select2"
             else:
-                label=self.fields[k].label.lower()
+                label = self.fields[k].label.lower()
                 if 'class' in self.fields[k].widget.attrs:
                     self.fields[k].widget.attrs['class'] += " form-control"
                 else:
@@ -74,9 +84,13 @@ class FormBase(forms.Form):
                 self.fields[k].widget.attrs['col'] = "12"
             if self.fields[k].required and self.fields[k].label:
                 self.fields[k].label = mark_safe(self.fields[k].label + '<span style="color:red;margin-left:2px;"><strong>*</strong></span>')
+            elif self.fields[k].label:
+                self.fields[k].label = mark_safe(self.fields[k].label + '<span class="text-muted fs-6"> (Opcional)</span>')
+
             self.fields[k].widget.attrs['data-nameinput'] = k
             if self.ver:
                 self.fields[k].widget.attrs['readonly'] = "readonly"
+
 
 class FormBaseUser(forms.Form):
 
@@ -109,7 +123,7 @@ class FormBaseUser(forms.Form):
                 # self.fields[k].input_formats = ['%d/%m/%Y']
             elif isinstance(field, forms.BooleanField):
                 if 'switch' in self.fields[k].widget.attrs:
-                    if 'class' in self.fields[k].widget.attrs :
+                    if 'class' in self.fields[k].widget.attrs:
                         self.fields[k].widget.attrs['class'] += " form-check-input"
                     else:
                         self.fields[k].widget.attrs['class'] = "form-check-input"
@@ -120,8 +134,13 @@ class FormBaseUser(forms.Form):
                         self.fields[k].widget.attrs['class'] += " form-control selectpicker"
                     else:
                         self.fields[k].widget.attrs['class'] = "form-control selectpicker"
+                else:
+                    if 'class' in self.fields[k].widget.attrs:
+                        self.fields[k].widget.attrs['class'] += " form-control select2"
+                    else:
+                        self.fields[k].widget.attrs['class'] = "form-control select2"
             else:
-                label=self.fields[k].label.lower()
+                label = self.fields[k].label.lower()
                 if 'class' in self.fields[k].widget.attrs:
                     self.fields[k].widget.attrs['class'] += " form-control"
                 else:
@@ -136,53 +155,53 @@ class FormBaseUser(forms.Form):
 
     def clean(self):
         cleaned_data = super().clean()
-        cleaned_data['nombres']=nombres = cleaned_data.get('nombres').upper()
-        cleaned_data['apellido1']=apellido1 = cleaned_data.get('apellido1').upper()
-        cleaned_data['apellido2']=apellido2 = cleaned_data.get('apellido2').upper()
-        cleaned_data['email']=email=cleaned_data.get('email').lower()
+        cleaned_data['nombres'] = nombres = cleaned_data.get('nombres').upper()
+        cleaned_data['apellido1'] = apellido1 = cleaned_data.get('apellido1').upper()
+        cleaned_data['apellido2'] = apellido2 = cleaned_data.get('apellido2').upper()
+        cleaned_data['email'] = email = cleaned_data.get('email').lower()
         pasaporte = cleaned_data.get('pasaporte')
-        cedula=cleaned_data.get('cedula')
-        telefono=cleaned_data.get('telefono')
-        celular=cleaned_data.get('celular')
+        cedula = cleaned_data.get('cedula')
+        telefono = cleaned_data.get('telefono')
+        celular = cleaned_data.get('celular')
         nacionalidad = cleaned_data.get('nacionalidad')
 
         if not pasaporte and not cedula:
-            self.add_error('cedula','Llene por lo menos uno de los dos campos')
-            self.add_error('pasaporte','Llene por lo menos uno de los dos campos')
+            self.add_error('cedula', 'Llene por lo menos uno de los dos campos')
+            self.add_error('pasaporte', 'Llene por lo menos uno de los dos campos')
 
-        #Validaciones de campos
-        v_sololetrasform(self,nombres,'nombres')
-        v_sololetrasform(self,apellido1,'apellido1')
-        v_sololetrasform(self,apellido2,'apellido2')
+        # Validaciones de campos
+        v_sololetrasform(self, nombres, 'nombres')
+        v_sololetrasform(self, apellido1, 'apellido1')
+        v_sololetrasform(self, apellido2, 'apellido2')
         if cedula:
-            v_cedulaform(self, cedula,'cedula')
+            v_cedulaform(self, cedula, 'cedula')
         if pasaporte:
             v_solonumerosform(self, pasaporte, 'pasaporte')
         if telefono:
-            v_solonumerosform(self,telefono,'telefono')
-        if telefono:
+            v_solonumerosform(self, telefono, 'telefono')
+        if celular:
             v_solonumerosform(self, celular, 'celular')
         # if nacionalidad:
         #     v_sololetrasform(self,nacionalidad,'nacionalidad')
         #     cleaned_data['nacionalidad'] = nacionalidad.title()
 
-        #Comprobar existencia con datos ingresados
+        # Comprobar existencia con datos ingresados
         if not self.instancia and User.objects.filter(email=email).exists():
-            self.add_error('email','El email ingresado ya esta en uso.')
+            self.add_error('email', 'El email ingresado ya esta en uso.')
         if cedula and Persona.objects.filter(cedula=cedula, status=True).exists():
-            mensaje='La cédula ingresada ya esta en uso.'
+            mensaje = 'La cédula ingresada ya esta en uso.'
             if self.instancia:
                 cedula_actual = getattr(self.instancia, 'cedula', None)
                 if not cedula == cedula_actual:
-                    self.add_error('cedula',mensaje)
+                    self.add_error('cedula', mensaje)
             else:
-                self.add_error('cedula',mensaje)
+                self.add_error('cedula', mensaje)
         if pasaporte and Persona.objects.filter(pasaporte=pasaporte, status=True).exists():
-            mensaje='El pasaporte ingresado ya esta en uso.'
+            mensaje = 'El pasaporte ingresado ya esta en uso.'
             if self.instancia:
-                pasaporte_actual=getattr(self.instancia,'pasaporte', None)
+                pasaporte_actual = getattr(self.instancia, 'pasaporte', None)
                 if not pasaporte == pasaporte_actual:
-                    self.add_error('pasaporte',mensaje)
+                    self.add_error('pasaporte', mensaje)
             else:
                 self.add_error('pasaporte', mensaje)
         return cleaned_data

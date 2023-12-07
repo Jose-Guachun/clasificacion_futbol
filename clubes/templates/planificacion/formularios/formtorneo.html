@@ -1,0 +1,39 @@
+{% extends 'base_ajax_form_modal.html' %}
+{% load extra_tags %}
+{% block extra_js_modal %}
+    <script>
+        $(document).ready(function () {
+            // Agrega un evento click al botón de guardar
+            $("#submit").on("click", function (event) {
+                // Verifica si al menos un checkbox con nombre "tipo" está marcado
+                if ($('input[name="tipo"]:checked').length === 0) {
+                    // Ningún checkbox está marcado, muestra un mensaje de error o realiza alguna acción
+                    alertaWarning("Debes marcar al menos un partido");
+                     event.preventDefault();
+                }
+            });
+        });
+    </script>
+{% endblock %}
+{% block extra_input_modal %}
+    <div class="row  mt-2">
+        <label for="courseTitle" class="form-label mb-1"><i class="fas fa-futbol"></i> Partidos disponibles<span
+                style="color:red;margin-left:2px;"><strong>*</strong></span>:</label>
+        <div class="col-12 ps-5">
+            {% for tipo in tipopartidos %}
+                {% if tipo.fases %}
+                    {% with tipomarcado=tipo|args:torneo|call:'tipomarcado'%}
+                        <div class="mb-2">
+                            <h6 class="mb-0">
+                                <input type="checkbox" name="tipo" id="id_tipo" class="tipo" value="{{ tipo.id }}" {% if tipomarcado %}checked{% endif %}> {{ tipo }}
+                            </h6>
+                            {% for tf in tipo.fases %}
+                                <p class="ps-4 my-0">{{ tf.fase }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endwith %}
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+{% endblock %}

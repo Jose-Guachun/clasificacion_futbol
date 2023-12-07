@@ -18,6 +18,7 @@ urlpatterns = [
 
     # CONTROL USUARIOS
     re_path(r'^usuarios$', adm_users.ViewSet.as_view(), name='usuarios'),
+
     # re_path(r'^administrativos$', administrativos.ViewSet.as_view(), name='administrativos'),
     # # re_path(r'^estudiantes$', estudiantes.ViewSet.as_view(), name='estudiantes'),
     # re_path(r'^docentes$', docentes.ViewSet.as_view(), name='docentes'),

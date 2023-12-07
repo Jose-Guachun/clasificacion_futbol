@@ -20,9 +20,9 @@ from django.conf import settings
 from django.conf.urls.static import static
 from django.urls import path, include, re_path
 
-urlpatterns = [
-    path('admin/', admin.site.urls),
-    # CONTROL DE ACCESO USUARIO
-    re_path(r'^', include(('users.urls', 'users'), namespace='users')),
-     re_path(r'^', include(('clubes.urls', 'clubes'), namespace='clubes')),
-]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+urlpatterns = [path('admin/', admin.site.urls),
+               # CONTROL DE ACCESO USUARIO
+               re_path(r'^', include(('users.urls', 'users'), namespace='users')),
+               re_path(r'^', include(('clubes.urls', 'clubes'), namespace='clubes')),
+               re_path(r'^', include(('core.urls', 'core'), namespace='core')),
+               ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

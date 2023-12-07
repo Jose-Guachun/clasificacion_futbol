@@ -14,6 +14,44 @@
                 document.getElementById("id_atras").click();
             });
         });
+        $(function (){
+            $("#contentForm .select2").select2({width: '100%', placeholder: 'Seleccione una opción...', minimumResultsForSearch: 15})
+        });
+        function cargarSelectSecundario(action, objeto_p, objeto_s, url) {
+            objeto_p.on("select2:select", function (evt) {
+                // Realizar la consulta AJAX utilizando el valor seleccionado
+                cargarLista(action, objeto_p, objeto_s, '', '', url)
+            });
+        }
+
+        // Codependiente para cargar select secundario
+        function cargarLista(action, objeto_p, objeto_s, id = '', args = '', url = '{{ request.path }}') {
+            bloqueointerface()
+            let value = objeto_p.val();
+            $.ajax({
+                url: url,
+                type: 'GET',
+                data: {'id': value, 'action': action, 'args': args},
+                success: function (response) {
+                    $.unblockUI();
+                    // Limpiar el select secundario
+                    objeto_s.empty();
+
+                    // Llenar el select secundario con las opciones de la respuesta de la consulta AJAX
+                    $.each(response.data, function (index, option) {
+                        objeto_s.append($('<option>').text(option.text).val(option.value));
+                    });
+
+                    // Actualizar el select secundario con las nuevas opciones
+                    objeto_s.val(id).trigger('change');
+                },
+                error: function (xhr, status, error) {
+                    $.unblockUI();
+                    // Manejar el error de la consulta AJAX si es necesario
+                }
+            });
+        }
+
     </script>
     {% block extra_js_1 %}{% endblock %}
 {% endblock %}
@@ -22,7 +60,7 @@
         <div class="container">
             <div class="row">
                 <div class="offset-lg-1 col-lg-10 col-md-12 col-12">
-                    <form  class="form-s" autocomplete="off" method="POST" enctype="multipart/form-data" action="{{ request.path }}">
+                    <form  class="form-s" autocomplete="off" method="POST" enctype="multipart/form-data" action="{{ request.path }}" id="contentForm">
                     {% csrf_token %}
                     <input type="hidden" name="id" value="{{ id|encrypt }}">
                     {% block action %}
@@ -50,8 +88,9 @@
                                           <div id="message_top">
                                           </div>
                                      </div>
+                                    {% block extra_input_top %}{% endblock %}
                                     {% for item in form %}
-                                        <div class="col-12 col-lg-{% if item.field.widget.attrs.col %}{{ item.field.widget.attrs.col }}{% else %}12{% endif %} mb-2">
+                                        <div class="col-12 col-lg-{% if item.field.widget.attrs.col %}{{ item.field.widget.attrs.col }}{% else %}12{% endif %} mb-2" id="col_{{ item.name }}">
                                             <label for="courseTitle" class="form-label mb-1">{{ item.label }}:</label>
                                             {% if item.field.widget.attrs.editor %}
                                                 <input type="hidden" id="id_{{ item.name }}" name="{{ item.name }}" value="{{ item.value }}">
