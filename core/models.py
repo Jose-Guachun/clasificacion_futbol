@@ -47,12 +47,12 @@ class ModeloBase(models.Model):
 
 class ModeloBaseAdmin(admin.ModelAdmin):
 
-    def get_actions(self, request):
-        actions = super().get_actions(request)
-        if request.user.username not in [x[0] for x in MANAGERS]:
-            if 'delete_selected' in actions:
-                del actions['delete_selected']
-        return actions
+    # def get_actions(self, request):
+    #     actions = super().get_actions(request)
+    #     if request.user.username not in [x[0] for x in MANAGERS]:
+    #         if 'delete_selected' in actions:
+    #             del actions['delete_selected']
+    #     return actions
 
     # def has_add_permission(self, request):
     #     return request.user.username in [x[0] for x in MANAGERS]
