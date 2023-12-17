@@ -1,16 +1,15 @@
 from datetime import datetime
 
 from django.db import models
+from django.db.models import Sum, Value, Count
+from django.db.models.functions import Coalesce
+
 from core.models import ModeloBase
 from users.models import Persona
 
 TIPO_ROL = (
     (1, 'Jugador'),
     (2, 'Director Técnico'),
-    (3, 'Cuerpo Técnico'),
-    (4, 'Gerente Deportivo'),
-    (5, 'Presidente'),
-    (6, 'Director Financiero'),
 )
 TIPO_JUGADOR = (
     (0, 'No es Jugador'),
@@ -48,6 +47,23 @@ class Club(ModeloBase):
     def __str__(self):
         return u'%s' % self.nombre
 
+    def club_in_torneo(self, idtorneo=None):
+        if idtorneo:
+            torneo = Torneo.objects.get(id=int(idtorneo))
+            return self in torneo.equipos.all()
+        return False
+
+    def resultados_torneo(self, torneo):
+        resultados = self.resultadopartido_set.filter(status=True, partido__torneo=torneo)
+        tarjetas = self.tarjetapartido_set.filter(status=True, partido__torneo=torneo)
+        context = {'total_partidos': len(resultados),
+                   'total_puntos': resultados.aggregate(totalpuntos=Coalesce(Sum('puntos'), Value(0)))['totalpuntos'],
+                   'total_tarjetas': len(tarjetas),
+                   'tarjeta': tarjetas.values('tipotarjeta__nombre').annotate(conteo=Count('id')),
+                   'total_pagar': tarjetas.aggregate(totalpagar=Coalesce(Sum('tipotarjeta__valor'), Value(0.00)))['totalpagar']
+                   }
+        return context
+
     def total_integrantes(self):
         return self.integranteclub_set.filter(status=True)
 
@@ -82,6 +98,10 @@ class Club(ModeloBase):
         qs = Club.objects.filter(nombre=self.nombre, status=True).exclude(pk=self.pk).exists()
         if qs:
             raise NameError('Ya existe un registro con los datos que intenta registrar.')
+
+    def resultado_partido(self, partido):
+        resultado = self.resultadopartido_set.filter(status=True, partido=partido).first()
+        return resultado
 
     def save(self, *args, **kwargs):
         self.nombre = self.nombre.upper()
@@ -184,15 +204,37 @@ class TipoPartidoFase(ModeloBase):
 class Torneo(ModeloBase):
     nombre = models.CharField(default='', max_length=500, verbose_name=u"Nombre del torneo")
     tipopartidos = models.ManyToManyField(TipoPartido, verbose_name="Tipos de partidos que se jugaran")
+    generotorneo = models.IntegerField(choices=TIPO_CLUB, default=1, verbose_name="genero de participantes")
+    equipos = models.ManyToManyField(Club, verbose_name='Equipos que participan en el torneo')
 
     def __str__(self):
-        return f'{self.nombre}'
+        return f'{self.nombre}-{self.get_generotorneo_display()}'
 
     def validate_unique(self, exclude=None):
         super().validate_unique(exclude=exclude)
         qs = Torneo.objects.filter(status=True, nombre=self.nombre).exclude(pk=self.pk).exists()
         if qs:
             raise NameError('Ya existe un registro con los datos que intenta registrar.')
+
+    def color_genero(self):
+        if self.generotorneo == 2:
+            return 'text-pink'
+        else:
+            return 'text-primary'
+
+    def goleadores(self):
+        goleadores = GolPartido.objects\
+            .filter(status=True, partido__torneo=self, integrante__isnull=False)\
+            .values('integrante',
+                    'integrante__persona__nombres',
+                    'club__nombre',
+                    'integrante__persona__apellido1',
+                    'integrante__persona__apellido2',
+                    'integrante__persona__foto',
+                    'integrante__persona__nacionalidad__nacionalidad') \
+            .annotate(total_goles=Count('integrante'))\
+            .order_by('-total_goles').distinct()
+        return goleadores
 
     class Meta:
         verbose_name = u"Torneo"
@@ -217,14 +259,40 @@ class Partido(ModeloBase):
     def goles_local(self):
         return len(self.golpartido_set.filter(status=True, club=self.clublocal))
 
+    def goles_l(self):
+        return self.golpartido_set.filter(status=True, club=self.clublocal)
+
     def goles_visitante(self):
         return len(self.golpartido_set.filter(status=True, club=self.clubvisitante))
+
+    def goles_v(self):
+        return self.golpartido_set.filter(status=True, club=self.clubvisitante)
 
     def t_tarjeta_local(self):
         return len(self.tarjetapartido_set.filter(status=True, club=self.clublocal))
 
+    def tarjetas_local(self):
+        return self.tarjetapartido_set.filter(status=True, club=self.clublocal)
+
     def t_tarjeta_visitante(self):
         return len(self.tarjetapartido_set.filter(status=True, club=self.clubvisitante))
+
+    def tarjetas_visitante(self):
+        return self.tarjetapartido_set.filter(status=True, club=self.clubvisitante)
+
+    def estado_indentify(self):
+        hoy = datetime.now()
+        fecha = datetime.strptime(self.fecha.strftime('%Y-%m-%d %H:%M:%S'), '%Y-%m-%d %H:%M:%S')
+        if fecha <= hoy and self.estado == 1:
+            return 3, 'Jugando'
+        return self.estado
+
+    def esta_jugando(self):
+        hoy = datetime.now()
+        fecha = datetime.strptime(self.fecha.strftime('%Y-%m-%d %H:%M:%S'), '%Y-%m-%d %H:%M:%S')
+        if fecha <= hoy and self.estado == 1:
+            return True
+        return False
 
     def get_estado(self):
         hoy = datetime.now()
@@ -234,6 +302,16 @@ class Partido(ModeloBase):
         elif self.estado == 2:
             return f'<span class="badge bg-success">{self.get_estado_display()}</span>'
         return f'<span class="badge bg-secondary">{self.get_estado_display()}</span>'
+
+    def resultado_gana(self):
+        goles_visitante = len(self.golpartido_set.filter(status=True, club=self.clubvisitante))
+        goles_local = len(self.golpartido_set.filter(status=True, club=self.clublocal))
+        if goles_visitante > goles_local:
+            return self.clubvisitante, self.clublocal
+        elif goles_visitante == goles_local:
+            return None, None
+        else:
+            return self.clublocal, self.clubvisitante
 
     def validate_unique(self, exclude=None):
         super().validate_unique(exclude=exclude)
@@ -293,9 +371,25 @@ class GolPartido(ModeloBase):
     minuto = models.IntegerField(default=0, verbose_name='Minutos en el que metio el gol')
 
     def __str__(self):
-        return f'Gol - {self.integrante} - {self.get_tiempo_display}'
+        return f'Gol - {self.get_tiempo_display}'
 
     class Meta:
-        verbose_name = u"Tarjeta partido"
-        verbose_name_plural = u"Tarjetas de partidos"
+        verbose_name = u"Gol partido"
+        verbose_name_plural = u"Goles de partidos"
+        ordering = ['-fecha_creacion']
+
+
+class ResultadoPartido(ModeloBase):
+    partido = models.ForeignKey(Partido, on_delete=models.CASCADE, blank=True, null=True, verbose_name=u"Partido")
+    club = models.ForeignKey(Club, on_delete=models.CASCADE, blank=True, null=True, verbose_name=u"Equipo ")
+    gano = models.BooleanField(default=False, verbose_name='Gano partido')
+    empato = models.BooleanField(default=False, verbose_name='Empato partido')
+    puntos = models.IntegerField(default=0, verbose_name='Puntos ganados')
+
+    def __str__(self):
+        return f'Resultados de {self.club}'
+
+    class Meta:
+        verbose_name = u"Resultado Partido"
+        verbose_name_plural = u"Resultados Partidos"
         ordering = ['-fecha_creacion']

@@ -1,0 +1,194 @@
+{% load extra_tags %}
+<div class="col-lg-6">
+    <div class="text-center">
+        <h5>{{ partido.clublocal.get_escudo_img_sm|safe }} {{ partido.clublocal }}</h5>
+    </div>
+    <h5 class=""><i class="fas fa-futbol"></i> Goles</h5>
+    <div class="table-responsive mb-6">
+        <table class="table mb-0 text-nowrap table-bordered" id="l_table">
+            <thead class="">
+            <tr>
+                <th scope="col" class="text-center">
+                    Minutos
+                </th>
+                <th scope="col" class="text-center">
+                    Jugador
+                </th>
+                <th scope="col" class="text-center">
+                    Gol
+                </th>
+                <th scope="col" class="text-center">
+
+                </th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for l in partido.goles_l %}
+                <tr>
+                    <td class="text-center align-middle w-3">
+                        <p>{{ l.minuto }}</p>
+                    </td>
+                    <td class="align-middle border-top-0 lh-15 w-50">
+                        {{ l.integrante.persona|title_cap }}
+                    </td>
+                    <td class="text-center align-middle">
+                        {{ l.cantidad }}
+                    </td>
+                    <td class="align-middle w-3">
+                        <a href="javascript:void(0)"
+                           onclick="eliminarajax('{{ l.id|encrypt }}','{{ l.persona }}','delgol')"
+                           class="text-danger"><i class="fe fe-trash"></i></a>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center">No existen registros</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <h5 class=""><i class="fas fa-sheet-plastic"></i> Tarjetas</h5>
+    <div class="table-responsive mb-6">
+        <table class="table mb-0 text-nowrap table-bordered" id="l_table">
+            <thead class="">
+            <tr>
+                <th scope="col" class="text-center">
+                    Minutos
+                </th>
+                <th scope="col" class="text-center">
+                    Jugador
+                </th>
+                <th scope="col" class="text-center">
+                    Tarjeta
+                </th>
+                <th scope="col" class="text-center">
+
+                </th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for l in partido.tarjetas_local %}
+                <tr>
+                    <td class="text-center align-middle w-3">
+                        <p>{{ l.get_tiempo_display }}</p>
+                        <p>{{ l.minuto }}</p>
+                    </td>
+                    <td class="align-middle border-top-0 lh-15 w-50">
+                        {{ l.integrante.persona|title_cap }}
+                    </td>
+                    <td class="text-center align-middle">
+                        {{ l.cantidad }} {{ l.tipotarjeta }}
+                    </td>
+                    <td class="align-middle w-3">
+                        <a href="javascript:void(0)"
+                           onclick="eliminarajax('{{ l.id|encrypt }}','{{ l.persona }}','deltarjeta')"
+                           class="text-danger"><i class="fe fe-trash"></i></a>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center">No existen registros</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+<div class="col-lg-6">
+    <div class="text-center">
+        <h5>{{ partido.clubvisitante.get_escudo_img_sm|safe }} {{ partido.clubvisitante }}</h5>
+    </div>
+    <h5 class=""><i class="fas fa-futbol"></i> Goles</h5>
+    <div class="table-responsive mb-6">
+        <table class="table mb-0 text-nowrap table-bordered" id="l_table">
+            <thead class="">
+            <tr>
+                <th scope="col" class="text-center">
+                    Minutos
+                </th>
+                <th scope="col" class="text-center">
+                    Jugador
+                </th>
+                <th scope="col" class="text-center">
+                    Gol
+                </th>
+                <th scope="col" class="text-center">
+
+                </th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for l in partido.goles_v %}
+                <tr>
+                    <td class="text-center align-middle w-3">
+                        <p>{{ l.minuto }}</p>
+                    </td>
+                    <td class="align-middle border-top-0 lh-15 w-50">
+                        {{ l.integrante.persona|title_cap }}
+                    </td>
+                    <td class="text-center align-middle">
+                        {{ l.cantidad }}
+                    </td>
+                    <td class="align-middle w-3">
+                        <a href="javascript:void(0)"
+                           onclick="eliminarajax('{{ l.id|encrypt }}','{{ l.persona }}','delgol')"
+                           class="text-danger"><i class="fe fe-trash"></i></a>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center">No existen registros</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+     <h5 class=""><i class="fas fa-sheet-plastic"></i> Tarjetas</h5>
+    <div class="table-responsive mb-6">
+        <table class="table mb-0 text-nowrap table-bordered" id="l_table">
+            <thead class="">
+            <tr>
+                <th scope="col" class="text-center">
+                    Minutos
+                </th>
+                <th scope="col" class="text-center">
+                    Jugador
+                </th>
+                <th scope="col" class="text-center">
+                    Tarjeta
+                </th>
+                <th scope="col" class="text-center">
+
+                </th>
+            </tr>
+            </thead>
+            <tbody>
+            {% for l in partido.tarjetas_visitante %}
+                <tr>
+                    <td class="text-center align-middle w-3">
+                        <p>{{ l.get_tiempo_display }}</p>
+                        <p>{{ l.minuto }}</p>
+                    </td>
+                    <td class="align-middle border-top-0 lh-15 w-50">
+                        {{ l.integrante.persona|title_cap }}
+                    </td>
+                    <td class="text-center align-middle">
+                        {{ l.cantidad }} {{ l.tipotarjeta }}
+                    </td>
+                    <td class="align-middle w-3">
+                        <a href="javascript:void(0)"
+                           onclick="eliminarajax('{{ l.id|encrypt }}','{{ l.persona }}','deltarjeta')"
+                           class="text-danger"><i class="fe fe-trash"></i></a>
+                    </td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="5" class="text-center">No existen registros</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>

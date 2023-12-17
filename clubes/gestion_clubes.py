@@ -4,7 +4,7 @@ from datetime import datetime
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import transaction
-from django.db.models import Q
+from django.db.models import Q, Sum
 from django.forms import model_to_dict
 from django.http import JsonResponse, HttpResponseRedirect
 from django.shortcuts import render
@@ -14,7 +14,7 @@ from users.models import Persona, Provincia, Pais, Ciudad
 from users.templatetags.extra_tags import encrypt
 from core.funciones import Paginacion, filtro_persona_generico, filtro_persona_generico_principal, generar_nombre_file
 from core.generic_save import add_user_with_profile, edit_persona_with_profile, gestionarusuario
-from clubes.models import Club, IntegranteClub, TIPO_ROL, Partido, TipoPartido, TipoPartidoFase, TarjetaPartido, Torneo, GolPartido
+from clubes.models import Club, IntegranteClub, TIPO_ROL, Partido, TipoPartido, TipoPartidoFase, TarjetaPartido, Torneo, GolPartido, ResultadoPartido
 from clubes.forms import ClubForm, IntegranteForm, PartidoForm, TarjetaForm, TorneoForm, GolForm
 
 
@@ -109,11 +109,11 @@ class ViewSet(LoginRequiredMixin, View):
                     idtorneo = request.GET['id']
                     torneo = Torneo.objects.get(id=int(encrypt(idtorneo)))
                     filtro, url_vars, search, tipopartido, fase, fecha = Q(status=True, torneo=torneo), \
-                                                                          f'&action={action}&id={idtorneo}', \
-                                                                          request.GET.get('s', ''), \
-                                                                          request.GET.get('tipopartido', ''), \
-                                                                          request.GET.get('fase', ''),\
-                                                                          request.GET.get('fecha', '')
+                                                                         f'&action={action}&id={idtorneo}', \
+                                                                         request.GET.get('s', ''), \
+                                                                         request.GET.get('tipopartido', ''), \
+                                                                         request.GET.get('fase', ''), \
+                                                                         request.GET.get('fecha', '')
                     if tipopartido:
                         context['tipopartido'] = tipopartido = int(tipopartido)
                         url_vars += f'&tipopartido={tipopartido}'
@@ -150,6 +150,8 @@ class ViewSet(LoginRequiredMixin, View):
                     torneo = Torneo.objects.get(id=int(request.GET['idp']))
                     form.fields['tipopartido'].queryset = TipoPartido.objects.filter(id__in=torneo.tipopartidos.all().values_list('id', flat=True))
                     form.fields['tipopartidofase'].queryset = TipoPartidoFase.objects.none()
+                    form.fields['clubvisitante'].queryset = Club.objects.filter(tipoequipo=torneo.generotorneo, status=True)
+                    form.fields['clublocal'].queryset = Club.objects.filter(tipoequipo=torneo.generotorneo, status=True)
                     context['form'] = form
                     context['idp'] = request.GET['idp']
                     template = get_template('planificacion/formularios/formpartidos.html')
@@ -263,7 +265,7 @@ class ViewSet(LoginRequiredMixin, View):
                     context['title'] = 'Torneos planificados'
                     filtro, url_vars, search = Q(status=True), \
                                                f'&action={action}', \
-                                              request.GET.get('s', ''),
+                                               request.GET.get('s', ''),
 
                     if search:
                         context['s'] = search
@@ -287,7 +289,8 @@ class ViewSet(LoginRequiredMixin, View):
                 try:
                     form = TorneoForm()
                     context['form'] = form
-                    context['torneo'] =False
+                    context['torneo'] = False
+                    context['seccionado'] = True
                     context['tipopartidos'] = TipoPartido.objects.filter(status=True)
                     template = get_template('planificacion/formularios/formtorneo.html')
                     return JsonResponse({'result': True, 'data': template.render(context)})
@@ -299,11 +302,65 @@ class ViewSet(LoginRequiredMixin, View):
                     context['id'] = id = int(encrypt(request.GET['id']))
                     instancia = Torneo.objects.get(id=id)
                     form = TorneoForm(instancia=instancia,
-                                       initial={'nombre': instancia.nombre})
+                                      initial={'nombre': instancia.nombre})
                     context['tipopartidos'] = TipoPartido.objects.filter(status=True)
                     context['form'] = form
+                    context['seccionado'] = True
                     context['torneo'] = instancia
                     template = get_template('planificacion/formularios/formtorneo.html')
+                    return JsonResponse({'result': True, 'data': template.render(context)})
+                except Exception as ex:
+                    return JsonResponse({'result': False, 'mensaje': f'Error: {ex}'})
+
+            elif action == 'posiciones':
+                try:
+                    context['title'] = 'Tabla de posiciones'
+                    idtorneo = request.GET['id']
+                    torneo = Torneo.objects.get(id=int(encrypt(idtorneo)))
+                    filtro, url_vars, search, tipopartido, fase, fecha = Q(status=True, torneo=torneo), \
+                                                                         f'&action={action}&id={idtorneo}', \
+                                                                         request.GET.get('s', ''), \
+                                                                         request.GET.get('tipopartido', ''), \
+                                                                         request.GET.get('fase', ''), \
+                                                                         request.GET.get('fecha', '')
+
+                    if search:
+                        context['s'] = search
+                        url_vars += '&s=' + search
+                        filtro = filtro & Q(nombre__icontains=search)
+                    equipos = torneo.equipos.all()
+                    # PAGINADOR
+                    paginator = Paginacion(equipos, 50)
+                    page = int(request.GET.get('page', 1))
+                    paginator.rangos_paginado(page)
+                    context['paging'] = paging = paginator.get_page(page)
+                    context['listado'] = paging.object_list
+                    context['url_vars'] = url_vars
+                    context['torneo'] = torneo
+                    context['viewactivo'] = 'partidos'
+                    return render(request, 'planificacion/posiciones.html', context)
+                except Exception as ex:
+                    messages.error(request, f'Error: {ex}')
+
+            elif action == 'cargarequiposfiltrado':
+                try:
+                    genero = int(request.GET['value'])
+                    torneo = request.GET.get('args','')
+                    clubes = Club.objects.filter(status=True, tipoequipo=genero)
+                    resp = [{'value': qs.pk,
+                             'text': f"{qs.nombre.title()}",
+                             'check': 'checked' if not torneo or qs.club_in_torneo(torneo) else '',
+                             'img': qs.get_escudo_img_sm()}
+                            for qs in clubes]
+                    return JsonResponse({'result': True, 'data': resp})
+                except Exception as ex:
+                    return JsonResponse({'result': False, 'mensaje': f'Error: {ex}'})
+
+            elif action == 'resultados':
+                try:
+                    context['id'] = id = int(encrypt(request.GET['id']))
+                    context['partido'] = Partido.objects.get(id=id)
+                    template = get_template('clubes/formularios/resultados.html')
                     return JsonResponse({'result': True, 'data': template.render(context)})
                 except Exception as ex:
                     return JsonResponse({'result': False, 'mensaje': f'Error: {ex}'})
@@ -490,7 +547,7 @@ class ViewSet(LoginRequiredMixin, View):
             try:
                 id = int(encrypt(request.POST['id']))
                 partido = Partido.objects.get(id=id)
-                form =TarjetaForm(request.POST)
+                form = TarjetaForm(request.POST)
                 if not form.is_valid():
                     form_e = [{k: v[0]} for k, v in form.errors.items()]
                     return JsonResponse({"result": False, "mensaje": 'Conflicto con formulario', "form": form_e})
@@ -510,15 +567,15 @@ class ViewSet(LoginRequiredMixin, View):
             try:
                 id = int(encrypt(request.POST['id']))
                 partido = Partido.objects.get(id=id)
-                form =GolForm(request.POST)
+                form = GolForm(request.POST)
                 if not form.is_valid():
                     form_e = [{k: v[0]} for k, v in form.errors.items()]
                     return JsonResponse({"result": False, "mensaje": 'Conflicto con formulario', "form": form_e})
                 instancia = GolPartido(partido=partido,
-                                           club=form.cleaned_data['club'],
-                                           tiempo=form.cleaned_data['tiempo'],
-                                           minuto=form.cleaned_data['minuto'],
-                                           integrante=form.cleaned_data['integrante'])
+                                       club=form.cleaned_data['club'],
+                                       tiempo=form.cleaned_data['tiempo'],
+                                       minuto=form.cleaned_data['minuto'],
+                                       integrante=form.cleaned_data['integrante'])
                 instancia.save(request)
                 return JsonResponse({"result": True, })
             except Exception as ex:
@@ -531,6 +588,50 @@ class ViewSet(LoginRequiredMixin, View):
                 partido = Partido.objects.get(id=id)
                 partido.estado = 2
                 partido.save(request)
+                club_gana, club_pierde = partido.resultado_gana()
+                resultado_local = partido.resultadopartido_set.filter(club=partido.clublocal, status=True).first()
+                resultado = partido.resultadopartido_set.filter(club=partido.clubvisitante, status=True).first()
+
+                if not club_gana:
+                    if not resultado_local:
+                        resultado_local = ResultadoPartido(partido=partido,
+                                                           club=partido.clublocal,
+                                                           empato=True, puntos=1)
+                        resultado_local.save(request)
+                    else:
+                        resultado_local.empato = True
+                        resultado_local.gano = False
+                        resultado_local.puntos = 1
+                        resultado_local.save(request)
+
+                    if not resultado:
+                        resultado = ResultadoPartido(partido=partido, club=partido.clubvisitante, empato=True, puntos=1)
+                        resultado.save(request)
+                    else:
+                        resultado.empato = True
+                        resultado.gano = False
+                        resultado.puntos = 1
+                        resultado.save(request)
+                else:
+                    resultado_gana = partido.resultadopartido_set.filter(club=club_gana, status=True).first()
+                    resultado_pierde = partido.resultadopartido_set.filter(club=club_pierde, status=True).first()
+                    if not resultado_gana:
+                        resultado_gana = ResultadoPartido(partido=partido, club=club_gana, gano=True, puntos=3)
+                        resultado_gana.save(request)
+                    else:
+                        resultado_gana.empato = False
+                        resultado_gana.gano = True
+                        resultado_gana.puntos = 3
+                        resultado_gana.save(request)
+
+                    if not resultado_pierde:
+                        resultado_pierde = ResultadoPartido(partido=partido, club=club_pierde, puntos=0)
+                        resultado_pierde.save(request)
+                    else:
+                        resultado_pierde.empato = False
+                        resultado_pierde.gano = False
+                        resultado_pierde.puntos = 0
+                        resultado_pierde.save(request)
                 return JsonResponse({"result": True, })
             except Exception as ex:
                 transaction.set_rollback(True)
@@ -545,18 +646,22 @@ class ViewSet(LoginRequiredMixin, View):
             except Exception as ex:
                 return JsonResponse({"result": False, "mensaje": f'Error {ex}'})
 
-        if action == 'addtorneo':
+        elif action == 'addtorneo':
             try:
                 form = TorneoForm(request.POST)
                 tipos = request.POST.getlist('tipo')
+                equipos = request.POST.getlist('equipos')
                 if not form.is_valid():
                     form_e = [{k: v[0]} for k, v in form.errors.items()]
                     return JsonResponse({"result": False, "mensaje": 'Conflicto con formulario', "form": form_e})
 
-                instancia = Torneo(nombre=form.cleaned_data['nombre'])
+                instancia = Torneo(nombre=form.cleaned_data['nombre'],
+                                   generotorneo=form.cleaned_data['generotorneo'])
                 instancia.save(request)
                 for tipo in tipos:
                     instancia.tipopartidos.add(int(tipo))
+                for equipo in equipos:
+                    instancia.equipos.add(int(equipo))
 
                 return JsonResponse({"result": True, })
             except Exception as ex:
@@ -566,16 +671,22 @@ class ViewSet(LoginRequiredMixin, View):
         elif action == 'edittorneo':
             try:
                 tipos = request.POST.getlist('tipo')
+                equipos = request.POST.getlist('equipos')
                 torneo = Torneo.objects.get(id=int(encrypt(request.POST['id'])))
                 form = TorneoForm(request.POST, instancia=torneo)
                 if not form.is_valid():
                     form_e = [{k: v[0]} for k, v in form.errors.items()]
                     return JsonResponse({"result": False, "mensaje": 'Conflicto con formulario', "form": form_e})
                 torneo.nombre = form.cleaned_data['nombre']
+                torneo.generotorneo = form.cleaned_data['generotorneo']
                 torneo.save(request)
                 torneo.tipopartidos.clear()
                 for tipo in tipos:
                     torneo.tipopartidos.add(int(tipo))
+
+                torneo.equipos.clear()
+                for equipo in equipos:
+                    torneo.equipos.add(int(equipo))
                 return JsonResponse({"result": True, })
             except Exception as ex:
                 transaction.set_rollback(True)
@@ -586,6 +697,24 @@ class ViewSet(LoginRequiredMixin, View):
                 pers = Torneo.objects.get(id=int(encrypt(request.POST['id'])))
                 pers.status = False
                 pers.save(request)
+                return JsonResponse({"result": True}, safe=False)
+            except Exception as ex:
+                return JsonResponse({"result": False, "mensaje": f'Error {ex}'})
+
+        elif action == 'delgol':
+            try:
+                instancia = GolPartido.objects.get(id=int(encrypt(request.POST['id'])))
+                instancia.status = False
+                instancia.save(request)
+                return JsonResponse({"result": True}, safe=False)
+            except Exception as ex:
+                return JsonResponse({"result": False, "mensaje": f'Error {ex}'})
+
+        elif action == 'deltarjeta':
+            try:
+                instancia = TarjetaPartido.objects.get(id=int(encrypt(request.POST['id'])))
+                instancia.status = False
+                instancia.save(request)
                 return JsonResponse({"result": True}, safe=False)
             except Exception as ex:
                 return JsonResponse({"result": False, "mensaje": f'Error {ex}'})

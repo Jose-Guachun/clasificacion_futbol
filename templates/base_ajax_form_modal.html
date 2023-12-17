@@ -18,27 +18,20 @@
     </div>
 </div>
 {% block section_form %}
-    {% for item in form %}
-        <div class="col-12 col-lg-{% if item.field.widget.attrs.col %}{{ item.field.widget.attrs.col }}{% else %}12{% endif %} mb-2">
-            <label for="courseTitle" class="form-label mb-1"><i class="{{ item.field.widget.attrs.icon }}" id="icon_{{ item.name }}"></i> {{ item.label }}:</label>
-            {% if item.field.widget.attrs.editor %}
-                <input type="hidden" id="id_{{ item.name }}" name="{{ item.name }}">
-                <div class="miEditor" id="editor_{{ item.name }}" style="min-height: 10rem"></div>
-            {% elif item.field.widget.attrs.switch and item.widget_type == 'checkbox' %}
-                <span class="form-check form-switch form-switch-price">
-                {{ item }}
-            </span>
-            {% elif item.widget_type == 'select' and not item.field.widget.attrs.select2 %}
-                <div class="dropdown bootstrap-select" style="width: 100%;">
-                    {{ item }}
-                </div>
-            {% else %}
-                {{ item }}
-            {% endif %}
-            <p class="lh-1"><small>{{ item.help_text }}</small></p>
-            <p class="lh-1"><small class="text-danger" id="errorField{{ item.name }}"></small></p>
+    {% if seccionado %}
+        <div class="col-12">
+            <div class="row">
+               <div class="col-lg-6">
+                    {% include 'section_ajaxformmodal.html' %}
+               </div>
+                <div class="col-lg-6">
+                   {% block section_end %}{% endblock %}
+               </div>
+            </div>
         </div>
-    {% endfor %}
+    {% else %}
+        {% include 'section_ajaxformmodal.html' %}
+    {% endif %}
 {% endblock %}
 {% block extra_input_modal %}{% endblock %}
 {% block footer_modal %}
@@ -52,7 +45,7 @@
 {% endblock %}
 <script>
     $(function () {
-        $('select').select2({width: '100%', minimumResultsForSearch: 6})
+        $('.select2').select2({width: '100%', minimumResultsForSearch: 6})
         {#$("#contentForm .select2").select2({width: '100%', placeholder: 'Seleccione una opción...', minimumResultsForSearch: 15})#}
 
     });
@@ -91,6 +84,30 @@
             }
         });
     }
+
+        // Permite realizar funcionalidad a input tipo text con diseño para ingreso de datos solo numéricos ****
+    function consultaAjax(value, action, url = '{{ request.path }}', args='') {
+        bloqueointerface()
+        $.ajax({
+            url: url,
+            type: 'GET',
+            data: {'value': value,'args':args, 'action': action},
+            success: function (response) {
+                $.unblockUI();
+                if (response.results === false){
+                    mensajeDanger(response.mensaje)
+                }else{
+                    consultaAjaxResponse(response)
+                }
+            },
+            error: function (xhr, status, error) {
+                $.unblockUI();
+                alertaDanger('Error de conexión')
+                // Manejar el error de la consulta AJAX si es necesario
+            }
+        });
+    }
+
 </script>
 <script type="text/javascript" src="{% static 'js/formquestion.js' %}"></script>
 <script type="text/javascript" src="{% static 'js/validators.js' %}"></script>

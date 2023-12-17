@@ -3,6 +3,11 @@
 {% block extra_js_modal %}
     <script>
         $(document).ready(function () {
+            let generotorneo = $("#id_generotorneo")
+            consultaAjax(generotorneo.val(),'cargarequiposfiltrado', '{{ request.path }}', '{{ id }}')
+            generotorneo.on('change', function (){
+                consultaAjax(generotorneo.val(),'cargarequiposfiltrado','{{ request.path }}','{{ id }}')
+            })
             // Agrega un evento click al botón de guardar
             $("#submit").on("click", function (event) {
                 // Verifica si al menos un checkbox con nombre "tipo" está marcado
@@ -13,6 +18,16 @@
                 }
             });
         });
+         function consultaAjaxResponse(response){
+             $("#id_registros").empty()
+            $.each(response.data, function (index, option) {
+                $("#id_registros").append(`
+                <tr data-id="${option.value}">
+                    <td class="align-middle"><input type="checkbox" name="equipos" ${option.check} value="${option.value}"> ${ option.img } ${ option.text }</td>
+                </tr>
+                `);
+            });
+        }
     </script>
 {% endblock %}
 {% block extra_input_modal %}
@@ -35,5 +50,33 @@
                 {% endif %}
             {% endfor %}
         </div>
+    </div>
+{% endblock %}
+{% block section_end %}
+    <label for="courseTitle" class="form-label mb-1"><i class="fas fa-users"></i> Equipos a participar
+        <span style="color:red;margin-left:2px;"><strong>*</strong></span>:</label>
+    <div class="table-responsive">
+        <table class="table mb-0 table-bordered" id="l_table">
+{#            <thead class="table-light">#}
+{#            <tr>#}
+{#                <th scope="col">#}
+{#                    Equipo#}
+{#                </th>#}
+{#            </tr>#}
+{#            </thead>#}
+            <tbody id="id_registros">
+            {% for l in listado %}
+                <tr>
+                    <td class="text-center align-middle w-5">{{ forloop.counter }}</td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td class="text-center">No existen registros</td>
+                </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+        <!-- Pagination -->
+        {% include 'paginador.html' %}
     </div>
 {% endblock %}

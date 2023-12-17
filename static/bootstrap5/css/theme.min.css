@@ -337,7 +337,7 @@ a.text-body:hover, a.text-muted:hover, a:hover .text-primary-hover {
     --bs-dark-danger: #ae302e;
     --bs-dark-success: #139a74;
     --bs-dark-secondary: #5c596d;
-    --bs-primary-rgb: 117, 79, 254;
+    --bs-primary-rgb: 13, 110, 253;
     --bs-secondary-rgb: 121, 117, 143;
     --bs-success-rgb: 25, 203, 152;
     --bs-info-rgb: 41, 186, 249;
@@ -12519,6 +12519,11 @@ textarea.form-control-lg {
 .text-warning {
     --bs-text-opacity: 1;
     color: rgba(var(--bs-warning-rgb), var(--bs-text-opacity)) !important
+}
+
+.text-pink {
+    --bs-text-opacity: 1;
+    color:#f64c96 !important
 }
 
 .text-danger {
@@ -28566,7 +28571,7 @@ textarea.form-control-lg {
 .nav-lb-tab .nav-item .nav-link {
     border-bottom: 2px solid transparent;
     border-radius: 0;
-    color: #79758f;
+    color: #fbfbff;
     font-weight: 500;
     margin-bottom: -1px;
     padding: 16px 0;
@@ -28575,8 +28580,8 @@ textarea.form-control-lg {
 
 .nav-lb-tab .nav-item .nav-link.active, .nav-lb-tab .nav-item .nav-link:hover {
     background-color: transparent;
-    border-bottom: 2px solid #754ffe;
-    color: #754ffe
+    border-bottom: 2px solid #f7dcab;
+    color: #f7dcab
 }
 
 .nav-lt-tab {

@@ -34,22 +34,26 @@
                     <input type="hidden" name="action" value="{{ action }}">
                     <input type="hidden" name="id" value="{{ torneo.id|encrypt }}">
                     <div class="input-group">
-{#                        <div class="input-group-prepend">#}
-{#                            <input type="date" name="fecha" class="form-control">#}
-{#                        </div>#}
+                        {#                        <div class="input-group-prepend">#}
+                        {#                            <input type="date" name="fecha" class="form-control">#}
+                        {#                        </div>#}
                         <div class="input-group-prepend">
-                            <select name="tipopartido" id="id_tipo" class="selectpicker" placeholder="Seleccione un rol a filtrar">
+                            <select name="tipopartido" id="id_tipo" class="selectpicker"
+                                    placeholder="Seleccione un rol a filtrar">
                                 <option value=""></option>
                                 {% for t in tipopartidos %}
-                                    <option value="{{ t.id }}" {% if tipopartido == t.id %}selected{% endif %}>{{ t }}</option>
+                                    <option value="{{ t.id }}"
+                                            {% if tipopartido == t.id %}selected{% endif %}>{{ t }}</option>
                                 {% endfor %}
                             </select>
                         </div>
-                        <input type="search" class="form-control ps-6" name="s" placeholder="Buscar por nombre club..." value="{{ s }}"/>
+                        <input type="search" class="form-control ps-6" name="s" placeholder="Buscar por nombre club..."
+                               value="{{ s }}"/>
                         <div class="input-group-append">
                             <button class="btn btn-primary"><i class="fas fa-search"></i></button>
                             {% if url_vars %}
-                                <a href="{{ request.path }}?action={{ action }}&id={{ torneo.id|encrypt }}" class="btn btn-default"><i class="fas fa-refresh"></i></a>
+                                <a href="{{ request.path }}?action={{ action }}&id={{ torneo.id|encrypt }}"
+                                   class="btn btn-default"><i class="fas fa-refresh"></i></a>
                             {% endif %}
                         </div>
                     </div>
@@ -114,6 +118,15 @@
                                             <div class="fw-semi-bold fs-6 col-8">
                                                 {{ l.clublocal.get_escudo_img_sm|safe }}
                                                 {{ l.clublocal|title_cap }}
+                                                {% if l.estado == 2 %}
+                                                    {% with resultado=l.clublocal|args:l|call:'resultado_partido' %}
+                                                        {% if resultado.gano %}
+                                                            | <span class="text-success">Ganador</span>
+                                                        {% elif resultado.empato %}
+                                                            | <span class="text-primary">Empate</span>
+                                                        {% endif %}
+                                                    {% endwith %}
+                                                {% endif %}
                                             </div>
                                             <div class="text-center fw-semi-bold fs-6 col-2"> {{ l.goles_local }}</div>
                                             <div class="text-center fw-semi-bold fs-6 col-2"> {{ l.t_tarjeta_local }}</div>
@@ -122,6 +135,15 @@
                                             <div class=" fw-semi-bold fs-6 col-8">
                                                 {{ l.clubvisitante.get_escudo_img_sm|safe }}
                                                 {{ l.clubvisitante|title_cap }}
+                                                {% if l.estado == 2 %}
+                                                    {% with resultado=l.clubvisitante|args:l|call:'resultado_partido' %}
+                                                        {% if resultado.gano %}
+                                                            | <span class="text-success">Ganador</span>
+                                                        {% elif resultado.empato %}
+                                                            | <span class="text-primary">Empate</span>
+                                                        {% endif %}
+                                                    {% endwith %}
+                                                {% endif %}
                                             </div>
                                             <div class="text-center fw-semi-bold fs-6 col-2">{{ l.goles_visitante }}</div>
                                             <div class="text-center fw-semi-bold fs-6 col-2">{{ l.t_tarjeta_visitante }}</div>
@@ -140,27 +162,38 @@
                                       </a>
                                       <span class="dropdown-menu" aria-labelledby="courseDropdown1">
                                       <span class="dropdown-header"><i class="fas fa-cogs"></i> Acciones</span>
-                                          <a class="dropdown-item"
+                                          {% if l.esta_jugando %}
+                                              <a class="dropdown-item"
+                                                 href="javascript:void(0)"
+                                                 onclick="formModal('{{ l.pk|encrypt }}','Registrar resultados','registrargol','modal-md')">
+                                                <i class="fas fa-futbol dropdown-item-icon"></i>Registrar gol
+                                            </a>
+                                          {% endif %}
+                                          <a class="dropdown-item pl-0"
                                              href="javascript:void(0)"
-                                             onclick="formModal('{{ l.pk|encrypt }}','Registrar resultados','registrargol','modal-md')">
-                                            <i class="fas fa-futbol dropdown-item-icon"></i>Registrar gol
-                                        </a>
-                                           <a class="dropdown-item pl-0"
-                                              href="javascript:void(0)"
-                                              onclick="formModal('{{ l.pk|encrypt }}','Registrar tarjeta','registrartarjeta','modal-md')">
+                                             onclick="formModal('{{ l.pk|encrypt }}','Registrar tarjeta','registrartarjeta','modal-md')">
                                             <i class="fa-solid fa-sheet-plastic dropdown-item-icon pl-0"></i>Registrar tarjeta
                                         </a>
+                                      {% if not l.estado == 2 %}
                                           <a class="dropdown-item" href="javascript:void(0);"
-                                           onclick="accionNotificar('{{ l.pk|encrypt }}','{{ l }}','finalizar','Estas por finalizar el partido:')">
+                                             onclick="accionNotificar('{{ l.pk|encrypt }}','{{ l }}','finalizar','Estas por finalizar el partido:')">
                                             <i class="fe fe-check-circle dropdown-item-icon"></i>Finalizar partido
                                         </a>
                                         <a class="dropdown-item" href="javascript:void(0);"
                                            onclick="formModal('{{ l.pk|encrypt }}','Editar {{ l }}','editpartido','modal-md')">
                                             <i class="fe fe-edit dropdown-item-icon"></i>Editar
                                         </a>
+                                      {% endif %}
+
+                                      {% if not l.esta_jugando and not l.estado == 2 %}
                                         <a class="dropdown-item" href="javascript:void(0);"
                                            onclick="eliminarajax('{{ l.pk|encrypt }}','{{ l }}','delpartido')">
                                             <i class="fe fe-trash dropdown-item-icon"></i>Eliminar
+                                        </a>
+                                      {% endif %}
+                                        <a class="dropdown-item" href="javascript:void(0);"
+                                               onclick="formModal('{{ l.pk|encrypt }}','Resultados de partido {{ l }}','resultados','modal-xl')">
+                                                <i class="fe fe-check-square dropdown-item-icon"></i>Resultados
                                         </a>
                                       </span>
                                     </span>

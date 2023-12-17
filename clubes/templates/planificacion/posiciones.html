@@ -1,0 +1,142 @@
+{% extends 'base_admin.html' %}
+{% load static %}
+{% load extra_tags %}
+{% block heading %}{% endblock %}
+{% block extra_js %}
+    <script type="text/javascript">
+        $(document).ready(function () {
+            $('#l_table').DataTable({
+                {#"paging": false,  // Desactiva el paginador#}
+                {#"searching": false,  // Desactiva el buscador#}
+                "info": false,  // Desactiva la información de las entradas
+                "order": [[3, "dsc"]],  // Ordena por la segunda columna (ColumnaNumerica) de forma ascendente
+                "columnDefs": [{
+                    "targets": 0, // La primera columna
+                    "searchable": false,
+                    "orderable": false,
+                    "render": function (data, type, full, meta) {
+                        return meta.row + 1; // Devuelve el número de fila (empezando desde 1)
+                    }
+                }],
+                "language": {
+                    "decimal": "",
+                    "emptyTable": "No hay datos disponibles en la tabla",
+                    "infoEmpty": "Mostrando 0 a 0 de 0 entradas",
+                    "infoFiltered": "(filtrado de _MAX_ entradas totales)",
+                    "infoPostFix": "",
+                    "thousands": ",",
+                    "lengthMenu": "Mostrar _MENU_ entradas",
+                    "loadingRecords": "Cargando...",
+                    "processing": "Procesando...",
+                    "search": "Buscar:",
+                    "zeroRecords": "No se encontraron coincidencias",
+                    "paginate": {
+                        "first": "Primero",
+                        "last": "Último",
+                        "next": "Siguiente",
+                        "previous": "Anterior"
+                    },
+                    "aria": {
+                        "sortAscending": ": activar para ordenar la columna ascendente",
+                        "sortDescending": ": activar para ordenar la columna descendente"
+                    }
+                }
+            });
+        });
+        $(function () {
+            $("#l_total").text('({{ listado.count }})')
+        })
+    </script>
+{% endblock %}
+{% block url_atras %}{{ request.path }}?action=torneos{% endblock %}
+{% block enlaces_top %}
+    <li class="breadcrumb-item"><a href="{{ request.path }}?action=torneos">Torneos ({{ torneo }})</a></li>
+    <li class="breadcrumb-item">{{ title }}</li>
+{% endblock %}
+{% block botones_top %}
+    <div class="nav btn-group" role="tablist">
+        <a href="javascript:void(0)"
+           onclick="formModal('','Adicionar partido','addpartido','modal-lg',false,'{{ torneo.id }}')"
+           class="btn btn-primary btn-xs btn-xl"
+           title="Notificar a los directores el pago de los rubros" data-bs-toggle="tooltip"> <i class="fas fa-bell"></i> Noticicar pagos</a>
+
+    </div>
+{% endblock %}
+{% block content_1 %}
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <!-- table -->
+                <div class="table-responsive mb-6 mt-3 mx-3">
+                    <table class="table mb-0 table-bordered text-nowrap" id="l_table">
+                        <thead class="table-light">
+                        <tr>
+                            <th scope="col" class="text-center">
+                                <i class="fas fa-sort-numeric-asc"></i>
+                            </th>
+                            <th scope="col" class="text-center">
+                                Equipo
+                            </th>
+
+                            <th scope="col" class="text-center">
+                                Puntos
+                            </th>
+                             <th scope="col" class="text-center">
+                                Partidos
+                            </th>
+                            <th scope="col" class="">
+                                Tarjetas
+                            </th>
+
+                            <th class="text-center">
+                                Rubro
+                            </th>
+                            <th class="text-center"><i class="fas fa-cogs"></i></th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for l in listado %}
+                            <tr>
+                                <td class="text-center align-middle w-3"></td>
+                                <td class="align-middle border-top-0 lh-15 w-50">
+                                    {{ l.get_escudo_img_sm|safe }}
+                                    {{ l|title_cap }}
+                                </td>
+                                {% with resultado=l|args:torneo|call:'resultados_torneo' %}
+                                    <td class="text-center align-middle">
+                                        {{ resultado.total_puntos }}
+                                    </td>
+                                     <td class="text-center align-middle">
+                                        {{ resultado.total_partidos }}
+                                    </td>
+                                    <td class="align-middle w-15">
+                                        {% for tarjeta in resultado.tarjeta %}
+                                            <p class="mb-0">
+                                                {{ tarjeta.tipotarjeta__nombre }}: {{ tarjeta.conteo }}
+                                            </p>
+                                        {% endfor %}
+
+                                    </td>
+                                    <td class="align-middle text-center">
+                                        $ {{ resultado.total_pagar }}
+                                    </td>
+                                    <td>
+
+                                    </td>
+                                {% endwith %}
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td colspan="5" class="text-center">No existen registros</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                    <!-- Pagination -->
+                    {#                    {% include 'paginador.html' %}#}
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

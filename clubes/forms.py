@@ -99,9 +99,9 @@ class TorneoForm(FormBase):
     nombre = forms.CharField(label="Nombre del torneo",
                              required=True,
                              widget=forms.TextInput(attrs={'col': '12', 'icon': 'fas fa-trophy', 'placeholder': 'Describa el nombre del torneo'}))
-    # tipopartidos = forms.ModelMultipleChoiceField(label=u"Partidos", required=False,
-    #                                               queryset=TipoPartido.objects.filter(status=True),
-    #                                               widget=forms.SelectMultiple(attrs={'col': '6'}))
+    generotorneo = forms.ChoiceField(label=u"Categoria", required=True,
+                                      choices = TIPO_CLUB,
+                                      widget=forms.Select(attrs={'col': '12','class':'select2'}))
 
 
 class PartidoForm(FormBase):
@@ -113,10 +113,10 @@ class PartidoForm(FormBase):
                                            widget=forms.Select(attrs={'col': '6', 'class': 'select2'}))
     tipopartido = forms.ModelChoiceField(label=u"Tipo de partido", required=False,
                                          queryset=TipoPartido.objects.filter(status=True),
-                                         widget=forms.Select(attrs={'col': '6'}))
+                                         widget=forms.Select(attrs={'col': '6', 'class': 'select2'}))
     tipopartidofase = forms.ModelChoiceField(label=u"Fase", required=False,
                                              queryset=TipoPartidoFase.objects.filter(status=True),
-                                             widget=forms.Select(attrs={'col': '6'}))
+                                             widget=forms.Select(attrs={'col': '6', 'class': 'select2'}))
     fecha = forms.DateField(label=u'Fecha de encuentro', required=True, initial=datetime.now().date(),
                             widget=forms.DateTimeInput(attrs={'col': '6'}))
     hora = forms.TimeField(label=u'Hora de encuentro', required=True,
@@ -150,7 +150,7 @@ class TarjetaForm(FormBase):
                                          widget=forms.Select(attrs={'col': '6', 'class': 'select2'}))
     tiempo = forms.ChoiceField(label=u"Tiempo de partido", required=True,
                              choices=TIEMPOS,
-                             widget=forms.Select(attrs={'col': '6'}))
+                             widget=forms.Select(attrs={'col': '6','class': 'select2'}))
     minuto = forms.IntegerField(label=u'Minuto de gol', required=True,
                                 widget=forms.NumberInput(attrs={'col': '6', 'placeholder': '0'}))
 
@@ -163,6 +163,6 @@ class GolForm(FormBase):
                                         widget=forms.Select(attrs={'col': '12', 'class': 'select2'}))
     tiempo = forms.ChoiceField(label=u"Tiempo de partido", required=True,
                              choices=TIEMPOS,
-                             widget=forms.Select(attrs={'col': '6'}))
+                             widget=forms.Select(attrs={'col': '6','class': 'select2'}))
     minuto = forms.IntegerField(label=u'Minuto de gol', required=True,
                                 widget=forms.NumberInput(attrs={'col': '6', 'placeholder': '0'}))
