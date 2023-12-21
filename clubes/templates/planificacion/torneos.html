@@ -22,13 +22,14 @@
 {% block content_1 %}
     <div class="row mb-3">
         <form class="col-12" method="GET">
+            <input type="hidden" name="action" value="{{action}}">
             <!-- Card header -->
             <div class="card-header border-bottom-0 p-0 bg-white">
                 <div class="d-flex align-items-center">
                     <span class="position-absolute ps-3 search-icon">
                         <i class="fe fe-search"></i>
                     </span>
-                    <input type="search" class="form-control ps-6" name="s" placeholder="Buscar por nombre del club..."
+                    <input type="search" class="form-control ps-6" name="s" placeholder="Buscar por nombre del nombre de torneo..."
                            value="{{ s }}"/>
                 </div>
             </div>

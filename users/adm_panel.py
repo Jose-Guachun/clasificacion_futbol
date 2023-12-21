@@ -126,7 +126,7 @@ class MainView(View):
         elif action == 'partidos':
             try:
                 context['title'] = 'Inicio'
-                url_vars, filtros, categoria, tipopartido, fase, torneo, inicio, fin = '', Q(status=True), \
+                url_vars, filtros, categoria, tipopartido, fase, torneo, inicio, fin = f'&action={action}', Q(status=True), \
                                                                             request.GET.get('categoria', ''), \
                                                                             request.GET.get('tipopartido', ''), \
                                                                             request.GET.get('fase', ''), \

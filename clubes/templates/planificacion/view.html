@@ -39,7 +39,7 @@
                         {#                        </div>#}
                         <div class="input-group-prepend">
                             <select name="tipopartido" id="id_tipo" class="selectpicker"
-                                    placeholder="Seleccione un rol a filtrar">
+                                    placeholder="Seleccione un tipo de partido">
                                 <option value=""></option>
                                 {% for t in tipopartidos %}
                                     <option value="{{ t.id }}"
@@ -47,7 +47,7 @@
                                 {% endfor %}
                             </select>
                         </div>
-                        <input type="search" class="form-control ps-6" name="s" placeholder="Buscar por nombre club..."
+                        <input type="search" class="form-control ps-6" name="s" placeholder="Buscar por nombre de equipo..."
                                value="{{ s }}"/>
                         <div class="input-group-append">
                             <button class="btn btn-primary"><i class="fas fa-search"></i></button>
