@@ -54,8 +54,7 @@
 {% block url_atras %}{{ request.path }}?action=posiciones&id={{torneo.id|encrypt}}{% endblock %}
 {% block enlaces_top %}
 <li class="breadcrumb-item"><a href="{{ request.path }}?action=torneos">Torneos ({{ torneo }})</a></li>
-<li class="breadcrumb-item"><a href="{{ request.path }}?action=posiciones&id={{torneo.id|encrypt}}">Posiciones ({{
-        equipo|title_cap }})</a></li>
+<li class="breadcrumb-item"><a href="{{ request.path }}?action=posiciones&id={{torneo.id|encrypt}}">Posiciones ({{ equipo|title_cap }})</a></li>
 <li class="breadcrumb-item">{{ title }}</li>
 {% endblock %}
 {% block botones_top %}

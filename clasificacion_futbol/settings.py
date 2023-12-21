@@ -145,8 +145,8 @@ EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST="smtp.gmail.com"
 EMAIL_USE_TLS=True
 EMAIL_PORT=587
-EMAIL_HOST_USER="ventgram.ec@gmail.com"
-EMAIL_HOST_PASSWORD="hyoh yyjv gubc ldpa"
+EMAIL_HOST_USER="victor.campoverde.vera@gmail.com"
+EMAIL_HOST_PASSWORD="awdn kjws ubqx nsjn"
 
 SECURE_CONTENT_TYPE_NOSNIFF = True
 X_FRAME_OPTIONS = 'DENY'
