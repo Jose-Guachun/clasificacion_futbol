@@ -169,13 +169,19 @@
                                     </div>
                                 </div>
                                 <div class="dropdown-divider"></div>
-{#                                <ul class="list-unstyled">#}
+                             <ul class="list-unstyled">
 
-{#                                    <li>#}
-{#                                        <a class="dropdown-item" href="../profile-edit.html">#}
-{#                                            <i class="fe fe-user me-2"></i> Perfil#}
-{#                                        </a>#}
-{#                                    </li>#}
+                                   <li>
+                                       <a class="dropdown-item" href="javascript:void(0)"
+                                       onclick="accionNotificar('','Autenticación de dos factores','activardosfactore','{% if persona.dosfactores %}Desactivar{%else%}Activar{% endif %}','','/usuarios')">
+                                        {% if persona.dosfactores %}
+                                            <i class="fe fe-check-circle me-2 text-success"></i>
+                                        {%else%}
+                                            <i class="fa-regular fa-circle-xmark me-2 text-danger"></i>
+                                        {% endif %}
+                                        Verificación en 2 pasos
+                                      </a>
+                                 </li>
 {#                                    <li>#}
 {#                                        <a class="dropdown-item" href="../student-subscriptions.html">#}
 {#                                            <i class="fe fe-star me-2"></i> Subscription#}

@@ -10,11 +10,12 @@ from django.http import JsonResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.template.loader import get_template
 from django.views import View
+from core.mail import send_email
 from users.models import Persona, Provincia, Pais, Ciudad
 from users.templatetags.extra_tags import encrypt
 from core.funciones import Paginacion, filtro_persona_generico, filtro_persona_generico_principal, generar_nombre_file
 from core.generic_save import add_user_with_profile, edit_persona_with_profile, gestionarusuario
-from clubes.models import Club, IntegranteClub, TIPO_ROL, Partido, TipoPartido, TipoPartidoFase, TarjetaPartido, Torneo, GolPartido, ResultadoPartido
+from clubes.models import Club, IntegranteClub, TIPO_ROL, PagoRubroTarjeta, Partido, TipoPartido, TipoPartidoFase, TarjetaPartido, Torneo, GolPartido, ResultadoPartido
 from clubes.forms import ClubForm, IntegranteForm, PartidoForm, TarjetaForm, TorneoForm, GolForm
 
 
@@ -95,8 +96,8 @@ class ViewSet(LoginRequiredMixin, View):
                     d_iniciales.update(model_to_dict(integrante))
                     d_iniciales.update(model_to_dict(pers))
                     form = IntegranteForm(instancia=integrante, initial=d_iniciales)
-                    form.fields['provincia'].queryset = pers.pais.provincias()
-                    form.fields['ciudad'].queryset = pers.provincia.ciudades()
+                    form.fields['provincia'].queryset = pers.pais.provincias() if pers.pais else Provincia.objects.none()
+                    form.fields['ciudad'].queryset = pers.provincia.ciudades() if pers.provincia else Ciudad.objects.none()
                     context['form'] = form
                     form.edit()
                     return render(request, 'clubes/formularios/formintegrantes.html', context)
@@ -302,7 +303,10 @@ class ViewSet(LoginRequiredMixin, View):
                     context['id'] = id = int(encrypt(request.GET['id']))
                     instancia = Torneo.objects.get(id=id)
                     form = TorneoForm(instancia=instancia,
-                                      initial={'nombre': instancia.nombre})
+                                      initial={'nombre': instancia.nombre,
+                                               'inicio': instancia.inicio.date(),
+                                               'fin': instancia.fin.date(),
+                                               'generotorneo':instancia.generotorneo})
                     context['tipopartidos'] = TipoPartido.objects.filter(status=True)
                     context['form'] = form
                     context['seccionado'] = True
@@ -364,6 +368,42 @@ class ViewSet(LoginRequiredMixin, View):
                     return JsonResponse({'result': True, 'data': template.render(context)})
                 except Exception as ex:
                     return JsonResponse({'result': False, 'mensaje': f'Error: {ex}'})
+                
+            elif action == 'validarpagos':
+                try:
+                    context['id'] = id = int(encrypt(request.GET['id']))
+                    context['pago'] = pago = PagoRubroTarjeta.objects.get(id=id)
+                    context['tarjetas'] = TarjetaPartido.objects.filter(status=True, club=pago.equipo, partido__torneo=pago.torneo, pagado=False)
+                    template = get_template('clubes/formularios/pagosrubros.html')
+                    return JsonResponse({'result': True, 'data': template.render(context)})
+                except Exception as ex:
+                    return JsonResponse({'result': False, 'mensaje': f'Error: {ex}'})
+        
+            elif action == 'comprobantes':
+                try:
+                    context['title'] = 'Comprobantes'
+                    idclub = request.GET['id']
+                    idtorneo = request.GET['idp']
+                    torneo = Torneo.objects.get(id=int(encrypt(idtorneo)))
+                    equipo = Club.objects.get(id=int(encrypt(idclub)))
+                    filtro, url_vars= Q(status=True, torneo=torneo, equipo=equipo), \
+                                        f'&action={action}&idp={idtorneo}&id={idclub}'
+                    # PAGINADOR
+                    pagos=PagoRubroTarjeta.objects.filter(filtro)
+                    paginator = Paginacion(pagos, 20)
+                    page = int(request.GET.get('page', 1))
+                    paginator.rangos_paginado(page)
+                    context['paging'] = paging = paginator.get_page(page)
+                    context['listado'] = paging.object_list
+                    context['url_vars'] = url_vars
+                    context['torneo'] = torneo
+                    context['equipo'] = equipo
+                    context['tarjetas'] = TarjetaPartido.objects.filter(status=True, club=equipo, partido__torneo=torneo, pagado=False)
+                    context['viewactivo'] = 'partidos'
+                    return render(request, 'planificacion/comprobantes.html', context)
+                except Exception as ex:
+                    messages.error(request, f'Error: {ex}')
+
         else:
             try:
                 context['title'] = 'Equipos'
@@ -556,8 +596,15 @@ class ViewSet(LoginRequiredMixin, View):
                                            tipotarjeta=form.cleaned_data['tipotarjeta'],
                                            tiempo=form.cleaned_data['tiempo'],
                                            minuto=form.cleaned_data['minuto'],
+                                           valor=form.cleaned_data['tipotarjeta'].valor,
                                            integrante=form.cleaned_data['integrante'])
                 instancia.save(request)
+                integrante=form.cleaned_data['integrante']
+                if integrante:
+                    if form.cleaned_data['tipotarjeta'].nombre.lower() in ['roja','rojas','rojo']:
+                        integrante.suspendido=True
+                        integrante.save(request)
+                    
                 return JsonResponse({"result": True, })
             except Exception as ex:
                 transaction.set_rollback(True)
@@ -656,6 +703,8 @@ class ViewSet(LoginRequiredMixin, View):
                     return JsonResponse({"result": False, "mensaje": 'Conflicto con formulario', "form": form_e})
 
                 instancia = Torneo(nombre=form.cleaned_data['nombre'],
+                                   inicio=form.cleaned_data['inicio'],
+                                   fin=form.cleaned_data['fin'],
                                    generotorneo=form.cleaned_data['generotorneo'])
                 instancia.save(request)
                 for tipo in tipos:
@@ -678,6 +727,8 @@ class ViewSet(LoginRequiredMixin, View):
                     form_e = [{k: v[0]} for k, v in form.errors.items()]
                     return JsonResponse({"result": False, "mensaje": 'Conflicto con formulario', "form": form_e})
                 torneo.nombre = form.cleaned_data['nombre']
+                torneo.inicio = form.cleaned_data['inicio']
+                torneo.fin = form.cleaned_data['fin']
                 torneo.generotorneo = form.cleaned_data['generotorneo']
                 torneo.save(request)
                 torneo.tipopartidos.clear()
@@ -718,5 +769,79 @@ class ViewSet(LoginRequiredMixin, View):
                 return JsonResponse({"result": True}, safe=False)
             except Exception as ex:
                 return JsonResponse({"result": False, "mensaje": f'Error {ex}'})
-
+        
+        elif action == 'notificarpago':
+            try:
+                context={}
+                instancia = Club.objects.get(id=int(encrypt(request.POST['id'])))
+                torneo = Torneo.objects.get(id=int(encrypt(request.POST['args'])))
+                director = instancia.total_integrantes().filter(rol=2).first()
+                tarjetas=instancia.tarjetas_pagar(torneo)
+                if director:
+                    context['director'] = director.persona
+                    context['equipo'] = instancia
+                    context['rubro'] = tarjetas
+                    send_email('Pago de rubros por tarjetas',
+                        'Se le concedio los permisos para proceder con la creación del usuario en la plataforma',
+                        director.persona.email,
+                        context,
+                        'correo_pago_individual.html')
+                messages.success(request, 'Se notifico exitosamente el pago de rubros')
+                return JsonResponse({"result": True}, safe=False)
+            except Exception as ex:
+                return JsonResponse({"result": False, "mensaje": f'Error {ex}'})
+        
+        elif action == 'notificarpagos':
+            try:
+                context={}
+                torneo = Torneo.objects.get(id=int(encrypt(request.POST['id'])))
+                equipos = torneo.equipos.all()
+                for instancia in equipos:
+                    director = instancia.total_integrantes().filter(rol=2).first()
+                    tarjetas=instancia.tarjetas_pagar(torneo)
+                    if director and tarjetas:
+                        context['director'] = director.persona
+                        context['equipo'] = instancia
+                        context['rubro'] = tarjetas
+                        send_email('Pago de rubros por tarjetas', '',
+                            director.persona.email,
+                            context,
+                            'correo_pago_individual.html')
+                messages.success(request, 'Se notifico exitosamente el pago de rubros')
+                return JsonResponse({"result": True}, safe=False)
+            except Exception as ex:
+                return JsonResponse({"result": False, "mensaje": f'Error {ex}'})
+        
+        elif action == 'validarpagos':
+            try:
+                context={}
+                tarjetas = request.POST.getlist('tarjetas')
+                estado=int(request.POST['estado'] )
+                if not tarjetas:
+                    return JsonResponse({"result": False, "mensaje": f'Sin tarjetas disponibles para pagos'})  
+                pago = PagoRubroTarjeta.objects.get(id=int(encrypt(request.POST['id'])))
+                pago.estado = estado
+                pago.observacion = request.POST['observacion']
+                pago.save(request)
+                pago.tarjetas.clear()
+                if estado==2:
+                    tarjetas=TarjetaPartido.objects.filter(id__in=tarjetas)
+                    for tarjeta in tarjetas:
+                        pago.tarjetas.add(tarjeta)
+                        tarjeta.pagado=True
+                        tarjeta.save()
+                director = pago.equipo.total_integrantes().filter(rol=2).first()
+                context['director'] = director.persona
+                context['equipo'] = pago.equipo
+                context['observacion'] = pago.observacion
+                context['estado'] = estado = pago.get_estado_display()
+                send_email(f'Validación de comprobante ({estado})', '',
+                    director.persona.email,
+                    context,
+                    'correo_validacion.html')
+                messages.success(request, 'Se valido y notifico exitosamente')
+                return JsonResponse({"result": True}, safe=False)
+            except Exception as ex:
+                return JsonResponse({"result": False, "mensaje": f'Error {ex}'})  
+        
         return JsonResponse({"result": False, "mensaje": u"Solicitud Incorrecta."})

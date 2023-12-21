@@ -207,10 +207,10 @@
             }
         })
     }
-    function accionNotificar(pk, nombre, accion, titulo = '') {
+    
+    function accionNotificar(pk, nombre, accion, titulo = '', args='',url_='{{request.path}}') {
         Swal.fire({
             html: `<b>${titulo}</b><p>${nombre}</p>`,
-            text: "Esta acción es irreversible",
             icon: 'info',
             showCancelButton: true,
             allowOutsideClick: false,
@@ -220,12 +220,13 @@
             if (result.value) {
                 $.ajax({
                     type: 'POST',
-                    url: '{{ reques.path }}',
+                    url: url_,
                     async: false,
                     data: {
                         csrfmiddlewaretoken: '{{ csrf_token }}',
                         action: accion,
                         id: pk,
+                        args: args,
                     },
                     dataType: "json",
                     beforeSend: function () {

@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content_js %}
+    <script type="text/javascript" src="{% static 'js/formquestion.js' %}"></script>
+{% endblock %}
+  <!-- Page content -->
+{% block content %}
+    <div class="container d-flex flex-column">
+        <div class="row align-items-center justify-content-center g-0 min-vh-100">
+
+          <div class="col-lg-5 col-md-8 py-8 py-xl-0">
+            <!-- Card -->
+            <div class="card shadow ">
+              <!-- Card body -->
+              <div class="card-body p-6">
+                <div class="mb-4">
+                  <a href="../index.html"><img src="../assets/images/brand/logo/logo-icon.svg" class="mb-4" alt=""></a>
+                  <h1 class="mb-1 fw-bold">Validar acceso</h1>
+                  <span>Se te envio un código de acceso a <a href="">{{persona.email}}</a> para poder ingresar</span>
+                </div>
+                <!-- Form -->
+                <form  class="sign-in-form form-s" autocomplete="off" method="POST" enctype="multipart/form-data" action="{{ request.path }}">
+                    {% csrf_token %}
+                      <div class="mb-3">
+                        <label for="token" class="form-label">Código de verificación <b class="text-danger">*</b>:</label>
+                        <input type="text" id="token" class="form-control" name="token" placeholder="Ingrese su código de verificación" required>
+                        <span class="text-danger errorField" id="errorFieldcode"></span>
+                      </div>
+                  <div>
+                        <!-- Button -->
+                      <div class="d-grid">
+                    <button type="submit" class="btn btn-primary">Validar código</button>
+                  </div>
+                  </div>
+                  <hr class="my-4">
+                 
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+{% endblock %}
+

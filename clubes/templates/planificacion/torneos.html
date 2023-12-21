@@ -48,6 +48,9 @@
                             <th scope="col" class="text-center">
                                 Nombre
                             </th>
+                            <th scope="col" class="">
+                                Fechas
+                            </th>
                             <th scope="col" class="text-center">
                                 Categoría
                             </th>
@@ -67,6 +70,10 @@
                                 <td class="align-middle border-top-0 text-center w-30">
                                     {{ l.nombre }}
                                 </td>
+                                <td class="align-middle border-top-0 w-15">
+                                    <p><b>Inicio: </b>{{l.inicio|date:'d-m-Y'}}</p>
+                                    <p><b>Fin: </b>{{l.fin|date:'d-m-Y'}}</p>
+                                </td>
                                 <td class="align-middle border-top-0 text-center w-30">
                                     {{ l.get_generotorneo_display }}
                                 </td>
@@ -80,7 +87,7 @@
                                         </div>
                                     {% endfor %}
                                 </td>
-                                <td class="text-center w-5">{{ l.equipos.all|length }}</td>
+                                <td class="text-center w-5 align-middle">{{ l.equipos.all|length }}</td>
                                 <td class="align-middle border-top-0 text-center w-3">
                                     <span class="dropdown dropstart">
                                       <a class="btn-icon btn btn-sm rounded-circle" href="#"
@@ -104,10 +111,12 @@
                                            onclick="formModal('{{ l.pk|encrypt }}','Editar {{ l }}','edittorneo','modal-lg')">
                                             <i class="fe fe-edit dropdown-item-icon"></i>Editar
                                         </a>
+                                        {% if not l.en_uso %}
                                         <a class="dropdown-item" href="javascript:void(0);"
                                            onclick="eliminarajax('{{ l.pk|encrypt }}','{{ l }}','deltorneo')">
                                             <i class="fe fe-trash dropdown-item-icon"></i>Eliminar
                                         </a>
+                                        {% endif %}
                                       </span>
                                     </span>
                                 </td>

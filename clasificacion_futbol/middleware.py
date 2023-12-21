@@ -2,7 +2,7 @@ from django.shortcuts import redirect
 from django.urls import reverse
 
 from django.contrib.auth.models import User
-
+from users.models import Persona
 
 class BlockUrlsMiddleware:
     # Middleware de finalización de perfil.
@@ -16,45 +16,17 @@ class BlockUrlsMiddleware:
             la vista."""
         if not request.user.is_anonymous:
             if not request.user.is_staff:
-                # if request.user.is_verified:
-                if request.path in [reverse('users:signup'), reverse('users:login'),]:
-                    return redirect('users:home')
-                # else:
-                    # users = User.objects.all()
-                    # for user in users:
-                    #     if request.path in [
-                    #         reverse('users:detail', args=[user.username]),
-                    #         # reverse('iteractions:messages', args=[user.username]),
-                    #         # reverse('iteractions:directs', args=[user.username]),
-                    #         # reverse('iteractions:newconversation', args=[user.username]),
-                    #     ]:
-                    #         return redirect('users:validate_token')
-
-                    # projects = Project.objects.all()
-                    # for project in projects:
-                    #     if request.path in [
-                    #         reverse('posts:detail_project', args=[project.url, project.id]),
-                    #     ]:
-                    #         return redirect('users:validate_token')
-
-                    # if request.path in [
-                    #
-                    #     reverse('users:signup'),
-                    #     reverse('users:update_profile'),
-                    #     reverse('users:update_user'),
-                    #     reverse('users:social_net'),
-                    #     reverse('users:change_password'),
-                    #     reverse('users:delete_user'),
-                    #
-                    #     reverse('posts:feed'),
-                    #     reverse('posts:list_project'),
-                    #     reverse('posts:new_project'),
-                    #
-                    #     reverse('iteractions:list_user'),
-                    #     reverse('iteractions:notification'),
-                    #     reverse('iteractions:send-direct'),
-                    #
-                    # ]:
-                    #     return redirect('users:validate_token')
+                dosfactores=request.session['dosfactores']
+                autenticado=request.session['autenticado']
+                if not dosfactores or autenticado:
+                    if request.path in [reverse('users:signup'), reverse('users:login'), reverse('users:validate_token')]:
+                        return redirect('users:home')
+                else:
+                    if request.path in [reverse('users:signup'),
+                                        reverse('users:login'),
+                                        reverse('users:usuarios'),
+                                        reverse('users:home'),
+                                        reverse('clubes:gestion_clubes'),]:
+                         return redirect('users:validate_token')
         response = self.get_response(request)
         return response

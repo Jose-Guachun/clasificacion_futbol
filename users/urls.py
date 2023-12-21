@@ -15,6 +15,7 @@ urlpatterns = [
     re_path(r'^login$',control_acceso.LoginView.as_view(), name='login'),
     re_path(r'^signup$',control_acceso.SignupView.as_view(), name='signup'),
     re_path(r'^logout$',control_acceso.LogoutView.as_view(), name='logout'),
+    re_path(r'^validate_token$', control_acceso.validate_token, name='validate_token'),
 
     # CONTROL USUARIOS
     re_path(r'^usuarios$', adm_users.ViewSet.as_view(), name='usuarios'),

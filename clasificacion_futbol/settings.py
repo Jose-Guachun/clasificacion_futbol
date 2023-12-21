@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-(0kdvts281dv$_luzc9pi*-&cj^&h!0f)2^-%k@=tsd9n*x-1g
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '[::1]']
 
 
 # Application definition
@@ -140,3 +140,18 @@ LOGIN_URL='/login'
 LOGOUT_REDIRECT_URL = LOGIN_URL
 
 ADMINISTRADOR_ID = 1
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST="smtp.gmail.com"
+EMAIL_USE_TLS=True
+EMAIL_PORT=587
+EMAIL_HOST_USER="ventgram.ec@gmail.com"
+EMAIL_HOST_PASSWORD="hyoh yyjv gubc ldpa"
+
+SECURE_CONTENT_TYPE_NOSNIFF = True
+X_FRAME_OPTIONS = 'DENY'
+
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:8000",  # Reemplaza con la URL de tu aplicación front-end
+]
+

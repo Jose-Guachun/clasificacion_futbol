@@ -48,17 +48,18 @@ $(function () {
 
 <!----------------- FUNCIONES REUTILIZABLES -------------------->
 function bloqueointerface() {
+    var zIndexBlockUI = 10000;
     $.blockUI({
         message: '<span class="spinner-border text-secondary" role="status" aria-hidden="true" style="width: 5rem; height: 5rem;"></span>',
         css: {
             backgroundColor: 'transparent',
             border: '0',
-            zIndex: 9999999
+            zIndex: zIndexBlockUI
         },
         overlayCSS: {
             backgroundColor: 'rgba(17,17,17,0.23)',
             opacity: 0.8,
-            zIndex: 9999990
+            zIndex: zIndexBlockUI - 1
         }
     });
 }

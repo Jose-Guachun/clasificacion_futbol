@@ -21,10 +21,10 @@ class ClubForm(FormBase):
                              widget=forms.TextInput(attrs={'col': '12', 'icon': 'fa-regular fa-futbol', 'placeholder': 'Describa el nombre del club'}))
     descripcion = forms.CharField(label="Descripción del club",
                                   required=False,
-                                  widget=forms.Textarea(attrs={'col': '12', 'rows': '3', 'icon': 'fa-regular fa-commenting', 'placeholder': 'Describa el club a crear'}))
+                                  widget=forms.Textarea(attrs={'col': '12', 'rows': '3','icon': 'fa-regular fa-commenting', 'placeholder': 'Describa el club a crear'}))
     tipoequipo = forms.ChoiceField(label=u"Tipo de equipo", required=True,
                                    choices=TIPO_CLUB,
-                                   widget=forms.Select(attrs={'col': '12'}))
+                                   widget=forms.Select(attrs={'col': '12', 'class':'select2'}))
     escudo = forms.ImageField(label="Escudo", required=False, widget=forms.FileInput(attrs={'icon': 'fa-regular fa-image'}))
 
 
@@ -99,6 +99,10 @@ class TorneoForm(FormBase):
     nombre = forms.CharField(label="Nombre del torneo",
                              required=True,
                              widget=forms.TextInput(attrs={'col': '12', 'icon': 'fas fa-trophy', 'placeholder': 'Describa el nombre del torneo'}))
+    inicio = forms.DateField(label=u'Fecha de inicio', required=True, initial=datetime.now().date(),
+                            widget=forms.DateTimeInput(attrs={'col': '6'}))
+    fin = forms.DateField(label=u'Fecha de finalización', required=True, initial=datetime.now().date(),
+                            widget=forms.DateTimeInput(attrs={'col': '6'}))
     generotorneo = forms.ChoiceField(label=u"Categoria", required=True,
                                       choices = TIPO_CLUB,
                                       widget=forms.Select(attrs={'col': '12','class':'select2'}))

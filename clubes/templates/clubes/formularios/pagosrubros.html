@@ -1,0 +1,120 @@
+
+{% extends 'base_ajax_form_modal.html' %}
+{% load extra_tags %}
+{% block section_form %}
+    <div class="col-lg-6">
+        <h5 class=""><i class="fas fa-sheet-plastic"></i> Tarjetas pagadas</h5>
+        <div class="table-responsive mb-6">
+            <table class="table mb-0 text-nowrap table-bordered" id="l_table">
+                <thead class="">
+                <tr>
+                    <th scope="col" class="text-center">
+                        <i class="fe fe-check"></i>
+                    </th>
+                    <th scope="col" class="text-center">
+                        Jugador
+                    </th>
+                    <th scope="col" class="text-center">
+                        Tarjeta
+                    </th>
+                    <th scope="col" class="text-center">
+                        Valor
+                    </th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for l in tarjetas %}
+                    <tr>
+                        <td class="text-center w-3">
+                            <input type="checkbox" class="tarjeta" name="tarjetas" value="{{l.id}}" checked>
+                        </td>
+                        <td class="text-center align-middle w-50">
+                            {{ l.integrante.persona|title_cap }}
+                        </td>
+                        <td class="align-middle border-top-0 lh-15 w-15">
+                        {{ l.tipotarjeta }}
+                        </td>
+                        <td class="text-center align-middle">
+                            $ <span class="valor">{{l.valor}}</span>
+                        </td>
+                    
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center">No existen registros</td>
+                    </tr>
+                {% endfor %}
+                    <tr>
+                        <td colspan="3" class="text-end fw-semi-bold">Total</td>
+                        <td class="text-center" id="id_total"></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="">
+            <h5><i class="fas fa-list"></i> Detalle</h5>
+            <div class="ms-3">
+                <p><span class="fw-semi-bold">Fecha: </span>{{pago.fecha_creacion|date:'d-m-Y | H:i'}}</p>
+                <p><span class="fw-semi-bold">Valor pagado: </span>${{pago.valor}}</p>
+                <p><span class="fw-semi-bold">Comprobante: </span> <a href="{{pago.archivo.url}}" target="_blank" class="text-secondary"><i class="fe fe-eye text-success"></i> Ver comprobante</a></p>    
+            </div>
+        
+            <h5 class="mt-3"><i class="fe fe-check-circle"></i> Validar comprobante</h5>
+            <div class="mt-2 ms-3">
+                <label for=""><i class="fa-solid fa-traffic-light"></i> Estado <span class="fw-semi-bold text-danger">*</span>:</label>
+                <select name="estado" id="id_estado" class="select2">
+                    <option value="2" {% if pago.estado == 2 %}selected{% endif %}>Aprobado</option>
+                    <option value="3" {% if pago.estado == 3 %}selected{% endif %}>Rechazado</option>
+                </select>
+            </div>
+            <div class="mt-2 ms-3">
+                <label for=""><i class="fas fa-commenting"></i> Observación:</label>
+            <textarea name="observacion" id="id_observacion" rows="3" placeholder="Describa una obsevacion..." class="form-control">{{ pago.observacion }}</textarea>
+            </div>
+        </div>
+        
+    </div>
+{% endblock %}
+{% block extra_js_modal %}
+<script>
+    $(function(){
+        let total=calcularSuma()
+        $("#id_total").text('$ '+total) 
+        $(".tarjeta").change(function(){
+            total=calcularSuma()
+            $("#id_total").text('$ '+total) 
+        })
+    })
+//     function calcularSuma() {
+//     // Obtener todas las celdas con la clase "valor"
+//     var celdas = document.getElementsByClassName("valor");
+    
+//     // Inicializar la suma
+//     var suma = 0;
+
+//     // Iterar sobre las celdas y sumar sus valores convertidos a números
+//     for (var i = 0; i < celdas.length; i++) {
+//       suma += parseFloat(celdas[i].textContent) || 0;
+//     }
+//     console.log(suma)
+//     // Mostrar la suma en la consola o en algún otro lugar
+//     return suma
+//   }
+  function calcularSuma() {
+        var checkboxes = document.getElementsByName("tarjetas");
+        var suma = 0;
+
+        for (var i = 0; i < checkboxes.length; i++) {
+            if (checkboxes[i].checked) {
+                var valorElement = checkboxes[i].closest('tr').querySelector('.valor');
+                suma += parseFloat(valorElement.innerText) || 0;
+            }
+        }
+        return suma
+        // Mostrar la suma en la consola o en algún otro lugar
+        // console.log("Suma total:", suma);
+    }
+</script>
+{% endblock %}

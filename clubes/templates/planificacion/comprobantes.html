@@ -4,11 +4,12 @@
 {% block heading %}{% endblock %}
 {% block extra_js %}
 <script type="text/javascript">
+    {% if listado %}
     $(document).ready(function () {
         $('#l_table').DataTable({
             //"paging": false,  // Desactiva el paginado
             //"searching": false,  // Desactiva el buscado
-           
+
             "info": false,  // Desactiva la información de las entradas
             "order": [[3, "dsc"]],  // Ordena por la segunda columna (ColumnaNumerica) de forma ascendente
             "columnDefs": [{
@@ -44,24 +45,20 @@
             }
         });
     });
+    {% endif %}
     $(function () {
         $("#l_total").text('({{ listado.count }})')
     })
 </script>
 {% endblock %}
-{% block url_atras %}{{ request.path }}?action=torneos{% endblock %}
+{% block url_atras %}{{ request.path }}?action=posiciones&id={{torneo.id|encrypt}}{% endblock %}
 {% block enlaces_top %}
 <li class="breadcrumb-item"><a href="{{ request.path }}?action=torneos">Torneos ({{ torneo }})</a></li>
+<li class="breadcrumb-item"><a href="{{ request.path }}?action=posiciones&id={{torneo.id|encrypt}}">Posiciones ({{
+        equipo|title_cap }})</a></li>
 <li class="breadcrumb-item">{{ title }}</li>
 {% endblock %}
 {% block botones_top %}
-<div class="nav btn-group" role="tablist">
-    <a href="javascript:void(0)"
-        onclick="accionNotificar('{{torneo.id|encrypt}}','Se notificara a todos los directores tecnicos de cada equipo por correo electronica el pago de los rubros de tarjetas pendintes','notificarpagos','Notificaión masiva')"
-        class="btn btn-primary btn-xs btn-xl" title="Notificar a los directores el pago de los rubros"
-        data-bs-toggle="tooltip"> <i class="fas fa-bell"></i> Notificar pagos</a>
-
-</div>
 {% endblock %}
 {% block content_1 %}
 
@@ -70,85 +67,67 @@
         <div class="card">
             <!-- table -->
             <div class="table-responsive mb-6 mt-3 mx-3">
-                <table class="table mb-0 table-bordered text-nowrap w-100" id="l_table">
-                    <thead class="table-light">
-                        <tr>
-                            <th colspan="4" class="text-center">Resultado</th>
-                            <th colspan="5" class="text-center">Rubros</th>
-                        </tr>
+                <table class="table mb-0 text-nowrap" id="l_table">
+                    <thead class="">
                         <tr>
                             <th scope="col" class="text-center">
                                 <i class="fas fa-sort-numeric-asc"></i>
                             </th>
-                            <th scope="col" class="text-center">
-                                Equipo
+                            <th scope="col" class="w-30">
+                                Detalle
                             </th>
-
-                            <th scope="col" class="text-center">
-                                Puntos
-                            </th>
-                            <th scope="col" class="text-center">
-                                Partidos
-                            </th>
-                            <th scope="col" class="">
+                            <th scope="col" class="w-10">
                                 Tarjetas
                             </th>
-                            <th class="text-center w-3">
-                                Pendiente
+                            <th scope="col" class="text-center">
+                                Valor
+                            </th>
+                            <th scope="col" class="text-center">
+                                Estado
+                            </th>
+                            <th scope="col" class="text-center">
+                                Archivo
+                            </th>
+                            <th scope="col" class="text-center">
+                                Observación
                             </th>
                             <th class="text-center w-3">
-                                Pagado
+                                <i class="fa fa-cogs"></i>
                             </th>
-                            <th class="text-center w-3">
-                                Total
-                            </th>
-                            <th class="text-center"><i class="fas fa-cogs"></i></th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for l in listado %}
                         <tr>
-                            <td class="text-center align-middle w-3"></td>
-                            {% with resultado=l|args:torneo|call:'resultados_torneo' %}
-                            <td class="align-middle border-top-0 lh-15 w-50">
-                                {{ l.get_escudo_img_sm|safe }}
-                                {{ l|title_cap }}
-                                {% if resultado.pagorubros %}
-                                    <br>
-                                    <p class="ms-5">
-                                        <span class="badge bg-warning" href=""><i class="fe fe-bell"></i> Existen pagos por validar</span>
-                                    </p>
-                                {% endif %}
+                            <td class="text-center align-middle w-3">{{forloop.counter}}</td>
+                            <td class="align-middle border-top-0 lh-15 w-10 fs-6">
+                                <p><b>Fecha: </b>{{ l.fecha_creacion|date:'d-m-Y | H:i' }}</p>
+                                <p><b>Torneo: </b>{{l.torneo}}</p>
+                                <p><b>Equipo: </b> {{ l.equipo|title_cap }}</p>
                             </td>
-                            
-                            <td class="text-center align-middle">
-                                {{ resultado.total_puntos }}
-                            </td>
-                            <td class="text-center align-middle">
-                                {{ resultado.total_partidos }}
-                            </td>
-                            <td class="align-middle w-15">
-                              
-                                {% for tarjeta in resultado.tarjeta %}
+                            <td class="align-middle border-top-0 lh-15 w-10 ">
+                                {% for tarjeta in l.total_tarjetas %}
                                 <p class="mb-0">
                                     {{ tarjeta.tipotarjeta__nombre }}: {{ tarjeta.conteo }}
                                 </p>
                                 {% endfor %}
-                                
 
                             </td>
-                            <td class="align-middle text-center">
-                                <p>
-                                    $ {{ resultado.pendiente_pagar }}
+                            <td class="text-center align-middle">
+                                $ {{ l.valor }}
+                            </td>
+                            <td class="align-middle w-15 text-center">
+                                <p class="{{l.color_estado}}">
+                                    {{l.get_estado_display}}
                                 </p>
                             </td>
-                            <td class="align-middle text-center">
-                                $ {{ resultado.total_pagado }}
+                            <td class="text-center align-middle"><a href="{{l.archivo.url}}" target="_blank"><i
+                                        class="bi bi-file-pdf text-danger fs-3"></i></a>
                             </td>
-                            <td class="align-middle text-center">
-                                $ {{ resultado.total }}
+                            <td class="text-center align-middle">{{l.observacion}}
                             </td>
                             <td class="align-middle border-top-0 text-center w-3">
+                                {% if tarjetas %}
                                 <span class="dropdown dropstart">
                                     <a class="btn-icon btn btn-sm rounded-circle" href="#" role="button"
                                         id="courseDropdown1" data-bs-toggle="dropdown" data-bs-offset="-20,20"
@@ -157,25 +136,18 @@
                                     </a>
                                     <span class="dropdown-menu" aria-labelledby="courseDropdown1">
                                         <span class="dropdown-header"><i class="fas fa-cogs"></i> Acciones</span>
-                                        {% if resultado.pendiente_pagar > 0 %}
-                                            <a class="dropdown-item" href="javascript:void(0);"
-                                                onclick="accionNotificar('{{l.pk|encrypt}}','Se notificara por correo electronico, al director técnico del equipo {{l}}  el pago de los rubros de tarjetas','notificarpago','Notificaión individual','{{torneo.id|encrypt}}')">
-                                                <i class="fe fe-bell dropdown-item-icon"></i>Notificar pago
-                                            </a>
-                                        {% endif %}
-                                        
-                                            <a class="dropdown-item" href="{{request.path}}?action=comprobantes&id={{l.id|encrypt}}&idp={{torneo.id|encrypt}}">
-                                                <i class="fe fe-file dropdown-item-icon"></i>Comprobantes
-                                            </a>
-                                        
+                                        <a class="dropdown-item" href="javascript:void(0);"
+                                            onclick="formModal('{{l.id|encrypt}}','Validar comprobantes de pagos realizados', 'validarpagos','modal-lg', false,)">
+                                            <i class="fe fe-check-circle dropdown-item-icon"></i>Validar comprobante
+                                        </a>
                                     </span>
                                 </span>
+                                {% endif %}
                             </td>
-                            {% endwith %}
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="5" class="text-center">No existen registros</td>
+                            <td colspan="6" class="text-center">No existen registros</td>
                         </tr>
                         {% endfor %}
                     </tbody>

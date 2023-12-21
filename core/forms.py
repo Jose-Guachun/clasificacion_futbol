@@ -160,7 +160,7 @@ class FormBaseUser(forms.Form):
         cleaned_data['apellido2'] = apellido2 = cleaned_data.get('apellido2').upper()
         cleaned_data['email'] = email = cleaned_data.get('email').lower()
         pasaporte = cleaned_data.get('pasaporte')
-        cedula = cleaned_data.get('cedula')
+        cleaned_data['cedula'] = cedula = cleaned_data.get('cedula')
         telefono = cleaned_data.get('telefono')
         celular = cleaned_data.get('celular')
         nacionalidad = cleaned_data.get('nacionalidad')

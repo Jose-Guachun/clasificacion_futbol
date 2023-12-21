@@ -9,11 +9,12 @@ from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 # models
 from django.contrib.auth.models import User
 
-from clubes.models import TIPO_ROL, TIPO_JUGADOR
+from clubes.models import TIPO_ROL, TIPO_JUGADOR, Club, Torneo
 from core.forms import FormBase, FormBaseUser, deshabilitar_campo
 from core.funciones import generar_username
-from core.validators import SoloLetras
+from core.validators import SoloLetras, v_cedulaform
 from users.models import SEXO, Pais, PERFIL_USUARIO
+from users.models.models_profile import UsuariosAcceso
 
 
 class LoginForm(forms.Form):
@@ -69,6 +70,13 @@ class SignupForm(FormBaseUser):
         data = super().clean()
         password = data['password']
         password_confirmation = data['password_confirmation']
+        if 'cedula' in data and 'email' in data:
+            cedula = data['cedula']
+            email = data['email']
+            ua=UsuariosAcceso.objects.filter(cedula=cedula, email=email, status=True).exists()
+            if not ua:
+                self.add_error('cedula','Usuario con los datos proporcionado no tienen permiso de registro')
+                self.add_error('email','Usuario con los datos proporcionado no tienen permiso de registro')
         if len(password) >= 6:
             if password.islower() or password.isupper():
                 msg = "La contraseña tiene que tener por lo menos 1 letra mayuscula y 1 minuscula"
@@ -127,3 +135,44 @@ class UsuarioForm(FormBaseUser):
                 deshabilitar_campo(self, 'cedula')
             if pasaporte:
                 deshabilitar_campo(self, 'pasaporte')
+
+class UsuarioPermisoForm(FormBase):
+    cedula = forms.CharField(label=u"Cédula", max_length=10, required=True,
+                             widget=forms.TextInput(attrs={'col': '12', 'placeholder': 'Ingrese la cédula del administrativo', 'class': 'soloNumeros'}))
+    email = forms.CharField(label=u"Correo electrónico", max_length=200, required=True,
+                            widget=forms.EmailInput(attrs={'col': '12', 'placeholder': 'Ingrese el correo electrónico del administrativo'}))
+
+    def clean(self):
+       cleaned_data = super().clean()
+       cedula=cleaned_data.get('cedula')
+       email=cleaned_data.get('email')
+       v_cedulaform(self, cedula, 'cedula')
+       id = getattr(self.instancia, 'id', 0)
+
+       ua=UsuariosAcceso.objects.filter(Q(cedula=cedula) | Q(email=email),status=True).exclude(id=id).exists()
+       if ua:
+           self.add_error('email', 'Registro que intenta agregar ya se encuentra creado')
+           self.add_error('cedula', 'Registro que intenta agregar ya se encuentra creado')
+       return cleaned_data
+
+class PagoTarjetaForm(FormBase):
+    torneo = forms.ModelChoiceField(label=u"Torneo", required=True,
+                                    queryset=Torneo.objects.filter(status=True),
+                                    widget=forms.Select(attrs={'col': '6', 'class': 'select2'}))
+    equipo = forms.ModelChoiceField(label=u"Equipo", required=True,
+                                  queryset=Club.objects.filter(status=True),
+                                  widget=forms.Select(attrs={'col': '6', 'class': 'select2'}))
+    codigo = forms.CharField(label=u"Código de equipo", max_length=10, required=True,
+                            widget=forms.TextInput(attrs={'col': '6', 'placeholder': 'Código de su equipo proporcionado a su correo'}))
+    valor = forms.CharField(label=u"Valor pagado", max_length=10, required=True,
+                            widget=forms.TextInput(attrs={'col': '6', 'placeholder': '0.00'}))
+    archivo = forms.FileField(label=u"Comprobante de pago", required=True,
+                            widget=forms.FileInput(attrs={'col': '6',}))
+
+    def clean(self):
+       cleaned_data = super().clean()
+       equipo=cleaned_data.get('equipo')
+       codigo=cleaned_data.get('codigo')
+       if not codigo == equipo.codigo:
+           self.add_error('codigo','Código proporcionado no es el correcto')
+       return cleaned_data

@@ -41,6 +41,9 @@ class Persona(ModeloBase):
     ciudad = models.ForeignKey(Ciudad, blank=True, null=True, related_name='+', verbose_name=u"Ciudad de residencia", on_delete=models.CASCADE)
     direccion = models.CharField(default='', max_length=300, verbose_name=u"Calle principal")
     foto = models.ImageField(upload_to='users/foto', verbose_name=u'Foto',blank=True, null=True)
+    dosfactores = models.BooleanField(default=False, verbose_name='Autenticacion de dos factores')
+    codigoacceso = models.CharField(default='', max_length=50, verbose_name=u"Codigo de acceso")
+    autenticado = models.BooleanField(default=False, verbose_name='Verificación de acceso')
 
     def __str__(self):
         return self.nombres_completos_inverso()
@@ -104,3 +107,16 @@ class Persona(ModeloBase):
         verbose_name = u"Persona"
         verbose_name_plural = u"Personas"
         ordering = ['apellido1', 'apellido2', 'nombres']
+
+class UsuariosAcceso(ModeloBase):
+    cedula = models.CharField(default='', max_length=20, verbose_name=u"Cedula", blank=True, db_index=True)
+    email = models.CharField(default='', max_length=200, verbose_name=u"Correo electrónico personal")
+    
+    def __str__(self):
+        return self.cedula
+    
+    class Meta:
+        verbose_name = u"Usuario Acceso"
+        verbose_name_plural = u"Usuarios Acceso"
+
+   

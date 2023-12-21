@@ -1,21 +1,22 @@
 {% for item in form %}
-        <div class="col-12 col-lg-{% if item.field.widget.attrs.col %}{{ item.field.widget.attrs.col }}{% else %}12{% endif %} mb-2">
-            <label for="courseTitle" class="form-label mb-1"><i class="{{ item.field.widget.attrs.icon }}" id="icon_{{ item.name }}"></i> {{ item.label }}:</label>
-            {% if item.field.widget.attrs.editor %}
-                <input type="hidden" id="id_{{ item.name }}" name="{{ item.name }}">
-                <div class="miEditor" id="editor_{{ item.name }}" style="min-height: 10rem"></div>
-            {% elif item.field.widget.attrs.switch and item.widget_type == 'checkbox' %}
-                <span class="form-check form-switch form-switch-price">
+
+    <div class="col-12 col-lg-{% if item.field.widget.attrs.col %}{{ item.field.widget.attrs.col }}{% else %}12{% endif %} mb-2">
+        <label for="courseTitle" class="form-label mb-1"><i class="{{ item.field.widget.attrs.icon }}" id="icon_{{ item.name }}"></i> {{ item.label }}:</label>
+        {% if item.field.widget.attrs.editor %}
+            <input type="hidden" id="id_{{ item.name }}" name="{{ item.name }}">
+            <div class="miEditor" id="editor_{{ item.name }}" style="min-height: 10rem"></div>
+        {% elif item.field.widget.attrs.switch and item.widget_type == 'checkbox' %}
+            <span class="form-check form-switch form-switch-price">
+            {{ item }}
+        </span>
+        {% elif item.widget_type == 'select' and not item.field.widget.attrs.select2 %}
+            <div class="dropdown bootstrap-select" style="width: 100%;">
                 {{ item }}
-            </span>
-            {% elif item.widget_type == 'select' and not item.field.widget.attrs.select2 %}
-                <div class="dropdown bootstrap-select" style="width: 100%;">
-                    {{ item }}
-                </div>
-            {% else %}
-                {{ item }}
-            {% endif %}
-            <p class="lh-1"><small>{{ item.help_text }}</small></p>
-            <p class="lh-1"><small class="text-danger" id="errorField{{ item.name }}"></small></p>
-        </div>
-    {% endfor %}
+            </div>
+        {% else %}
+            {{ item }}
+        {% endif %}
+        <p class="lh-1"><small>{{ item.help_text }}</small></p>
+        <p class="lh-1"><small class="text-danger errorField" id="errorField{{ item.name }}"></small></p>
+    </div>
+{% endfor %}

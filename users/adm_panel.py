@@ -1,6 +1,7 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import transaction
 from django.db.models import Q
+from django.forms import model_to_dict
 from django.http import JsonResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.views import View
@@ -8,10 +9,12 @@ from datetime import date, datetime
 
 from pyexpat.errors import messages
 
-from clubes.models import Partido, Club, IntegranteClub, TipoPartido, Fase, TipoPartidoFase, Torneo
-from core.funciones import Paginacion
+from clubes.models import PagoRubroTarjeta, Partido, Club, IntegranteClub, TipoPartido, Fase, TipoPartidoFase, Torneo
+from core.funciones import Paginacion, generar_nombre_file
+from users.forms import PagoTarjetaForm
 from users.models import Persona
 from users.templatetags.extra_tags import encrypt
+from django.template.loader import get_template
 
 
 class MainView(View):
@@ -45,7 +48,7 @@ class MainView(View):
             except Exception as ex:
                 messages.error(request, f'Error: {ex}')
 
-        if action == 'goleadores':
+        elif action == 'goleadores':
             try:
                 context['title'] = 'Goleadores'
 
@@ -71,6 +74,45 @@ class MainView(View):
             except Exception as ex:
                 messages.error(request, f'Error: {ex}')
 
+        elif action == 'pagos': 
+            try:
+                context['title']='Subir evidencia'
+                context['codigo']= codigo = request.GET.get('codigo','')
+                url_vars, torneo, filtro = f'&action={action}&codigo={codigo}',  request.GET.get('torneof',''), Q(equipo__codigo=codigo, status=True)
+                if torneo:
+                    filtro=filtro & Q(torneo_id=torneo)
+                    url_vars+=f'&torneo={torneo}'
+                    context['torneo']=int(torneo)
+                pagos=PagoRubroTarjeta.objects.filter(filtro)
+                paginator = Paginacion(pagos, 50)
+                page = int(request.GET.get('page', 1))
+                paginator.rangos_paginado(page)
+                context['paging'] = paging = paginator.get_page(page)
+                context['listado'] = paging.object_list
+                context['url_vars'] = url_vars
+                context['torneos'] = Torneo.objects.filter(status=True)
+                return render(request, 'planificacion/pagos.html', context)
+            except Exception as ex:
+                    return JsonResponse({'result': False, 'mensaje': f'Error: {ex}'})
+                
+        elif action == 'addpago':
+            try:
+                form = PagoTarjetaForm()
+                context['form'] = form
+                template = get_template('base_ajax_form_modal.html')
+                return JsonResponse({'result': True, 'data': template.render(context)})
+            except Exception as ex:
+                return JsonResponse({'result': False, 'mensaje': f'Error: {ex}'})
+
+        elif action == 'editpago':
+            try:
+                context['id'] = id = int(encrypt(request.GET['id']))
+                pago = PagoRubroTarjeta.objects.get(id=id)
+                context['form'] = PagoTarjetaForm(instancia=pago, initial=model_to_dict(pago))
+                template = get_template('base_ajax_form_modal.html')
+                return JsonResponse({'result': True, 'data': template.render(context)})
+            except Exception as ex:
+                return JsonResponse({'result': False, 'mensaje': f'Error: {ex}'})
         else:
             context['title'] = 'Inicio'
             url_vars, filtros, categoria, tipopartido, fase, torneo, inicio, fin = '', Q(status=True), \
@@ -125,6 +167,67 @@ class MainView(View):
 
     def post(self, request, *args, **kwargs):
         action = request.POST['action']
+        if action == 'addpago':
+            try:
+                form = PagoTarjetaForm(request.POST, request.FILES)
+                if not form.is_valid():
+                    form_e = [{k: v[0]} for k, v in form.errors.items()]
+                    return JsonResponse({"result": False, "mensaje": 'Conflicto con formulario', "form": form_e})
+                newfile = form.cleaned_data['archivo']
+                equipo = form.cleaned_data['equipo']
+                if newfile:
+                    extension = newfile._name.split('.')
+                    exte = extension[len(extension) - 1]
+                    if newfile.size > 2194304:
+                        raise NameError(u"El tamaño del archivo es mayor a 2 Mb.")
+                    if not exte.lower() in ['png', 'jpg', 'jpeg', 'pdf', 'xml']:
+                        raise NameError(u"Solo se permite archivos de formato .png, .jpg, .jpeg, .pdf, .xml")
+                    newfile._name = generar_nombre_file(f'comprobante_{equipo.id}_', newfile._name)
+                pago = PagoRubroTarjeta(equipo=equipo,
+                                        torneo=form.cleaned_data['torneo'],
+                                        valor=form.cleaned_data['valor'],
+                                        archivo=newfile)
+                pago.save()
+                return JsonResponse({"result": True, })
+            except Exception as ex:
+                transaction.set_rollback(True)
+                return JsonResponse({"result": False, "mensaje": str(ex)})
+
+        elif action == 'editpago':
+            try:
+                pago = PagoRubroTarjeta.objects.get(id=int(encrypt(request.POST['id'])))
+                form = PagoTarjetaForm(request.POST, request.FILES, instancia=pago)
+                form.fields['archivo'].required=False
+                if not form.is_valid():
+                    form_e = [{k: v[0]} for k, v in form.errors.items()]
+                    return JsonResponse({"result": False, "mensaje": 'Conflicto con formulario', "form": form_e})
+                newfile = form.cleaned_data['archivo']
+                if newfile:
+                    extension = newfile._name.split('.')
+                    exte = extension[len(extension) - 1]
+                    if newfile.size > 2194304:
+                        raise NameError(u"El tamaño del archivo es mayor a 2 Mb.")
+                    if not exte.lower() in ['png', 'jpg', 'jpeg', 'pdf', 'xml']:
+                        raise NameError(u"Solo se permite archivos de formato .png, .jpg, .jpeg, .pdf, .xml")
+                    newfile._name = generar_nombre_file(f'escudo', newfile._name)
+                    pago.archivo = newfile
+                pago.equipo = form.cleaned_data['equipo']
+                pago.torneo = form.cleaned_data['torneo']
+                pago.valor = form.cleaned_data['valor']
+                pago.save()
+                return JsonResponse({"result": True, })
+            except Exception as ex:
+                transaction.set_rollback(True)
+                return JsonResponse({"result": False, "mensaje": str(ex)})
+
+        elif action == 'delpago':
+            try:
+                pers = PagoRubroTarjeta.objects.get(id=int(encrypt(request.POST['id'])))
+                pers.status = False
+                pers.save(request)
+                return JsonResponse({"result": True}, safe=False)
+            except Exception as ex:
+                return JsonResponse({"result": False, "mensaje": f'Error {ex}'})
         if action == 'signup':
             form = self.form_class(request.POST)
             if form.is_valid():

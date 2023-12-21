@@ -1,3 +1,5 @@
+import secrets  
+
 from datetime import datetime
 
 from django.core.paginator import Paginator
@@ -6,6 +8,11 @@ from unidecode import unidecode
 
 from django.contrib.auth.models import User
 
+def generarcodigoacceso(persona):
+    hoy=datetime.now()
+    #aleatorio=str(secrets.randbelow(10 ** 10))[:2]
+    codigo=f'{persona.usuario.id}{hoy.month}{hoy.day}{hoy.second}'
+    return codigo
 
 def generar_nombre_file(name, nombreoriginal):
     ext = ""
@@ -56,7 +63,8 @@ def filtro_persona_generico_principal(filtro, search):
 
 def generar_username(nombres, apellido1, apellido2):
     username = nombres[0] + apellido1 + apellido2[0]
-    if User.objects.filter(username=username.lower()).exists():
+    username = username.lower()
+    if User.objects.filter(username=username).exists():
         for numero in range(1, 20):
             username += f'{numero}'
             if not User.objects.filter(username=username).exists():

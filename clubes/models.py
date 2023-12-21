@@ -43,7 +43,8 @@ class Club(ModeloBase):
     descripcion = models.TextField(default='', verbose_name=u"descripción del club")
     tipoequipo = models.IntegerField(choices=TIPO_CLUB, default=1, verbose_name=u'Tipo de equipo')
     escudo = models.ImageField(upload_to='club', verbose_name=u'Escudo del club', blank=True, null=True)
-
+    codigo = models.CharField(default='', blank=True, null=True, verbose_name='Codigo de consulta', max_length=500)
+    
     def __str__(self):
         return u'%s' % self.nombre
 
@@ -56,14 +57,22 @@ class Club(ModeloBase):
     def resultados_torneo(self, torneo):
         resultados = self.resultadopartido_set.filter(status=True, partido__torneo=torneo)
         tarjetas = self.tarjetapartido_set.filter(status=True, partido__torneo=torneo)
+        pagorubros=self.pagorubrotarjeta_set.filter(status=True,torneo=torneo, estado=1)
         context = {'total_partidos': len(resultados),
                    'total_puntos': resultados.aggregate(totalpuntos=Coalesce(Sum('puntos'), Value(0)))['totalpuntos'],
                    'total_tarjetas': len(tarjetas),
                    'tarjeta': tarjetas.values('tipotarjeta__nombre').annotate(conteo=Count('id')),
-                   'total_pagar': tarjetas.aggregate(totalpagar=Coalesce(Sum('tipotarjeta__valor'), Value(0.00)))['totalpagar']
+                   'pendiente_pagar': tarjetas.filter(pagado=False).aggregate(totalpagar=Coalesce(Sum('valor'), Value(0.00)))['totalpagar'],
+                   'total_pagado': tarjetas.filter(pagado=True).aggregate(totalpagar=Coalesce(Sum('valor'), Value(0.00)))['totalpagar'],
+                   'total': tarjetas.aggregate(totalpagar=Coalesce(Sum('valor'), Value(0.00)))['totalpagar'],
+                   'pagorubros': pagorubros
                    }
         return context
 
+    def tarjetas_pagar(self, torneo):
+        tarjetas = self.tarjetapartido_set.filter(status=True, partido__torneo=torneo, pagado=False)
+        return {'tarjetas':tarjetas,'pendiente_pagar': tarjetas.aggregate(totalpagar=Coalesce(Sum('valor'), Value(0.00)))['totalpagar']}
+    
     def total_integrantes(self):
         return self.integranteclub_set.filter(status=True)
 
@@ -118,7 +127,8 @@ class IntegranteClub(ModeloBase):
     persona = models.ForeignKey(Persona, on_delete=models.CASCADE, verbose_name=u"Club")
     rol = models.IntegerField(choices=TIPO_ROL, default=1, verbose_name=u'Tipo de rol en el club')
     tipojugador = models.IntegerField(choices=TIPO_JUGADOR, default=0, verbose_name=u'Tipo de jugador en el club')
-
+    suspendido = models.BooleanField(default=False, verbose_name=u'Integrante suspendido')
+    
     def __str__(self):
         return f'{self.persona}'
 
@@ -176,7 +186,7 @@ class TipoPartido(ModeloBase):
 
     class Meta:
         verbose_name = u"Tipo Partido"
-        verbose_name_plural = u"Topos Partidos"
+        verbose_name_plural = u"Tipos Partidos"
         ordering = ['nombre']
 
 
@@ -206,7 +216,9 @@ class Torneo(ModeloBase):
     tipopartidos = models.ManyToManyField(TipoPartido, verbose_name="Tipos de partidos que se jugaran")
     generotorneo = models.IntegerField(choices=TIPO_CLUB, default=1, verbose_name="genero de participantes")
     equipos = models.ManyToManyField(Club, verbose_name='Equipos que participan en el torneo')
-
+    inicio = models.DateTimeField(blank=True, null=True, verbose_name='Fecha de inicio del torneo')
+    fin = models.DateTimeField(blank=True, null=True, verbose_name='Fecha que finaliza el torneo')
+    
     def __str__(self):
         return f'{self.nombre}-{self.get_generotorneo_display()}'
 
@@ -236,6 +248,8 @@ class Torneo(ModeloBase):
             .order_by('-total_goles').distinct()
         return goleadores
 
+    def en_uso(self):
+        return self.partido_set.filter(status=True).exists()
     class Meta:
         verbose_name = u"Torneo"
         verbose_name_plural = u"Torneos"
@@ -352,7 +366,9 @@ class TarjetaPartido(ModeloBase):
     cantidad = models.IntegerField(default=1, verbose_name=u'Cantidad de tarjetas')
     minuto = models.IntegerField(default=0, verbose_name='Minutos en el que le dio la tarjeta')
     tiempo = models.IntegerField(default=0, choices=TIEMPOS, verbose_name=u'Tiempo en el que le marcaron tarjeta')
-
+    valor = models.FloatField(default=0, blank=True, null=True, verbose_name=u"Valor de tarjeta")
+    pagado = models.BooleanField(default=False, verbose_name=u'Tarjeta pagado')
+    
     def __str__(self):
         return f'{self.tarjeta} - {self.integrante}'
 
@@ -392,4 +408,37 @@ class ResultadoPartido(ModeloBase):
     class Meta:
         verbose_name = u"Resultado Partido"
         verbose_name_plural = u"Resultados Partidos"
+        ordering = ['-fecha_creacion']
+
+ESTADO_PAGO=(
+    (1,'Pendiente'),
+    (2,'Aprobado'),
+    (3,'Rechazado')
+    )
+class PagoRubroTarjeta(ModeloBase):
+    torneo = models.ForeignKey(Torneo, on_delete=models.CASCADE, blank=True, null=True, verbose_name=u"torneo")
+    equipo = models.ForeignKey(Club, on_delete=models.CASCADE, blank=True, null=True, verbose_name=u"Equipo")
+    tarjetas = models.ManyToManyField(TarjetaPartido, verbose_name='Tarjeta Partidos')
+    archivo = models.FileField(upload_to='comprobantes', verbose_name=u'Comprobante de pago',blank=True, null=True)
+    estado = models.IntegerField(default=1, choices=ESTADO_PAGO, verbose_name=u'Tiempo en el que le marcaron tarjeta')
+    observacion = models.CharField(default='', blank=True, null=True, max_length=500, verbose_name='Observación del pago')
+    valor = models.FloatField(default=0, blank=True, null=True, verbose_name=u"Valor de tarjeta")
+    
+    def __str__(self):
+        fecha=self.fecha_creacion.strftime('%Y-%m-%d %H:%M:%S')
+        return f'{fecha}-{self.equipo}'
+    
+    def total_tarjetas(self):
+        return self.tarjetas.values('tipotarjeta__nombre').annotate(conteo=Count('id'))
+    
+    def color_estado(self):
+        if self.estado==1:
+            return 'text-secondary'
+        elif self.estado==2:
+            return 'text-success'
+        else:
+            return 'text-danger'
+    class Meta:
+        verbose_name = u"Pago de Rubro"
+        verbose_name_plural = u"Pago de Rubros"
         ordering = ['-fecha_creacion']
