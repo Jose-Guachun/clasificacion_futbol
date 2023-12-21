@@ -54,7 +54,7 @@
                             <th scope="col" class="text-center">
                                 Perfil
                             </th>
-                            <th scope="col" class="text-center w-5">
+                            <th scope="col" class="text-center w-3">
                                 Activo
                             </th>
                             <th scope="col" class="text-center w-5">
@@ -87,8 +87,12 @@
                             <td class="align-middle border-top-0 text-center w-5">
                                 <p>{{l.get_perfil_display}}</p>
                             </td>
-                            <td class="align-middle border-top-0 text-center w-5">
-                                <input type="checkbox" class="form-check-input" {% if l.usuario.is_active %}checked{% endif %}>
+                            <td class="align-middle border-top-0 text-center w-3">
+                                {% if l.usuario.is_active %}
+                                    <i class="fe fe-check-circle text-success"></i>
+                                {% else %}
+                                    <i class="fe fe-close text-danger"></i>
+                                {% endif %}
                             </td>
                             <td class="align-middle border-top-0 text-center w-5">
                                 <span class="dropdown dropstart">
