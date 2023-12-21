@@ -599,11 +599,11 @@ class ViewSet(LoginRequiredMixin, View):
                                            valor=form.cleaned_data['tipotarjeta'].valor,
                                            integrante=form.cleaned_data['integrante'])
                 instancia.save(request)
-                integrante=form.cleaned_data['integrante']
-                if integrante:
-                    if form.cleaned_data['tipotarjeta'].nombre.lower() in ['roja','rojas','rojo']:
-                        integrante.suspendido=True
-                        integrante.save(request)
+                # integrante=form.cleaned_data['integrante']
+                # if integrante:
+                #     if form.cleaned_data['tipotarjeta'].nombre.lower() in ['roja','rojas','rojo']:
+                #         integrante.suspendido=True
+                #         integrante.save(request)
                     
                 return JsonResponse({"result": True, })
             except Exception as ex:

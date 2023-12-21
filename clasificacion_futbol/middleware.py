@@ -15,18 +15,18 @@ class BlockUrlsMiddleware:
         """Código a ejecutar para cada solicitud antes de que se llame a
             la vista."""
         if not request.user.is_anonymous:
-            if not request.user.is_staff:
-                dosfactores=request.session['dosfactores']
-                autenticado=request.session['autenticado']
-                if not dosfactores or autenticado:
-                    if request.path in [reverse('users:signup'), reverse('users:login'), reverse('users:validate_token')]:
-                        return redirect('users:home')
-                else:
-                    if request.path in [reverse('users:signup'),
-                                        reverse('users:login'),
-                                        reverse('users:usuarios'),
-                                        reverse('users:home'),
-                                        reverse('clubes:gestion_clubes'),]:
-                         return redirect('users:validate_token')
+            #if not request.user.is_staff:
+            dosfactores=request.session['dosfactores']
+            autenticado=request.session['autenticado']
+            if not dosfactores or autenticado:
+                if request.path in [reverse('users:signup'), reverse('users:login'), reverse('users:validate_token')]:
+                    return redirect('users:home')
+            else:
+                if request.path in [reverse('users:signup'),
+                                    reverse('users:login'),
+                                    reverse('users:usuarios'),
+                                    reverse('users:home'),
+                                    reverse('clubes:gestion_clubes'),]:
+                        return redirect('users:validate_token')
         response = self.get_response(request)
         return response

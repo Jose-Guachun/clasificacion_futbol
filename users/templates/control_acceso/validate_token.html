@@ -28,9 +28,17 @@
                       </div>
                   <div>
                         <!-- Button -->
-                      <div class="d-grid">
-                    <button type="submit" class="btn btn-primary">Validar código</button>
-                  </div>
+                    <div class="row">
+                      <div class="col-6">
+                        <button type="submit" class="btn btn-primary w-100"><i class="fe fe-check-circle"></i> Validar código</button>
+                        
+                      </div>
+                      <div class="col-6">
+                        <a class="btn btn-secondary w-100" href="{% url 'users:logout' %}">
+                          <i class="fe fe-power me-2"></i> Salir
+                      </a>
+                      </div>
+                    </div>  
                   </div>
                   <hr class="my-4">
                  
