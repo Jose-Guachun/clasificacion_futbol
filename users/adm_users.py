@@ -124,6 +124,9 @@ class ViewSet(LoginRequiredMixin, View):
                     form_e = [{k: v[0]} for k, v in form.errors.items()]
                     return JsonResponse({"result": False, "mensaje": 'Conflicto con formulario', "form": form_e})
                 data = add_user_with_profile(request, form)
+                persona_ = data['persona']
+                send_email('Acceso al sistema Fcunemi', f'', 
+                           persona_.email, data,'correo_clave.html')
                 return JsonResponse({"result": True, "url_redirect": request.path})
             except Exception as ex:
                 transaction.set_rollback(True)

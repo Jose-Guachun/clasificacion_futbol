@@ -70,7 +70,9 @@ def add_user_with_profile(request, form, perfil=0, password=None, persona=None):
                           foto=newfile,
                           nacionalidad=data['nacionalidad'])
         persona.save(request)
+        context['password'] = password
         context['id_persona'] = persona.id
+        context['persona'] = persona
         return context
     except Exception as ex:
         transaction.set_rollback(True)
