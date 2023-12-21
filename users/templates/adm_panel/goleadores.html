@@ -121,7 +121,7 @@
                                 <td class="text-center align-middle w-3"></td>
                                 <td class="align-middle border-top-0 lh-15 w-50">
                                     {% if l.integrante__persona__foto %}
-                                        <img src="{{ request.path }}/{{ l.integrante__persona__foto }}" class="rounded-circle avatar-sm me-2"/>
+                                        <img src="/media/{{ l.integrante__persona__foto }}" class="rounded-circle avatar-sm me-2"/>
 {#                                    {% else %}#}
 {#                                        <div class="siglas-sm mt-0 ml-1 me-2"> <span class="mt-0">{{ l.integrante__persona__nombres|slice:'1'}}{{ l.integrante__persona__apellido1|slice:'1' }}</span></div>#}
                                     {% endif %}

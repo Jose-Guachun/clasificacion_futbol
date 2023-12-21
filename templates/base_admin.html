@@ -40,11 +40,13 @@
                         </a>
                     </li>
                     <!-- Nav item -->
+                    {% if request.session.perfil == 1 %}
                     <li class="nav-item">
                         <a class="nav-link bloqueo {% if viewactivo == 'usuarios' %}active{% endif %}" href="{% url 'users:usuarios' %}">
                             <i class="nav-icon fe fe-user-check me-2"></i> Usuarios
                         </a>
                     </li>
+                    {% endif %}
                     <!-- Nav item -->
                     <li class="nav-item">
                         <a class="nav-link bloqueo {% if viewactivo == 'clubes' %}active{% endif %}" href="{% url 'clubes:gestion_clubes' %}">

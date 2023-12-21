@@ -120,7 +120,7 @@ class UsuarioForm(FormBaseUser):
                                           queryset=Pais.objects.filter(status=True),
                                           widget=forms.Select(attrs={'col': '6'}))
     perfil = forms.ChoiceField(label=u'Perfil', required=True,
-                               choices=PERFIL_USUARIO[1:],
+                               choices=PERFIL_USUARIO[1:4],
                                widget=forms.Select(attrs={'col': '6'}))
     direccion = forms.CharField(label=u"Dirección de domicilio", max_length=50, required=False,
                                 widget=forms.TextInput(attrs={'col': '6', 'placeholder': 'Ingrese su dirección de calle principal'}))

@@ -83,6 +83,11 @@
                         </a>
                     </li>
                     <li class="nav-item mx-2">
+                        <a class="nav-link p-0 {% if action == 'partidos' %}active{% endif %}"
+                           href="{{ request.path }}?action=partidos">Partidos
+                        </a>
+                    </li>
+                    <li class="nav-item mx-2">
                         <a class="nav-link p-0 {% if action == 'posiciones' %}active{% endif %}"
                            href="{{ request.path }}?action=posiciones">
                             Tabla de posiciones
@@ -100,6 +105,7 @@
     </nav>
 
     <!-- Content -->
+    {% block content_1 %}
     <div class="content_canva">
     {% block section_top %}{% endblock %}
         <div class="container-xl mt-4">
@@ -108,6 +114,7 @@
             {% endblock %}
         </div>
     </div>
+    {% endblock %}
     <!-- Footer -->
     <!-- Footer -->
 

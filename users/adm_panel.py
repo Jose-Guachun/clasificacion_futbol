@@ -93,7 +93,7 @@ class MainView(View):
                 context['torneos'] = Torneo.objects.filter(status=True)
                 return render(request, 'planificacion/pagos.html', context)
             except Exception as ex:
-                    return JsonResponse({'result': False, 'mensaje': f'Error: {ex}'})
+                return JsonResponse({'result': False, 'mensaje': f'Error: {ex}'})
                 
         elif action == 'addpago':
             try:
@@ -122,58 +122,69 @@ class MainView(View):
                 return JsonResponse({'result': True, 'data': template.render(context)})
             except Exception as ex:
                 return JsonResponse({'result': False, 'mensaje': f'Error: {ex}'})
-                 
+        
+        elif action == 'partidos':
+            try:
+                context['title'] = 'Inicio'
+                url_vars, filtros, categoria, tipopartido, fase, torneo, inicio, fin = '', Q(status=True), \
+                                                                            request.GET.get('categoria', ''), \
+                                                                            request.GET.get('tipopartido', ''), \
+                                                                            request.GET.get('fase', ''), \
+                                                                            request.GET.get('torneo', ''),\
+                                                                            request.GET.get('inicio', ''),\
+                                                                            request.GET.get('fin', '')
+                if categoria:
+                    context['categoria'] = categoria=int(categoria)
+                    filtros = filtros & Q(torneo__generotorneo=categoria)
+                    url_vars += f"&categoria={categoria}"
+
+                if torneo:
+                    context['torneo'] = torneo = int(torneo)
+                    filtros = filtros & Q(torneo_id=torneo)
+                    url_vars += f"&torneo={torneo}"
+
+                if tipopartido:
+                    context['tipopartido'] = tipopartido = int(tipopartido)
+                    filtros = filtros & Q(tipopartido_id=tipopartido)
+                    url_vars += f"&tipopartido={tipopartido}"
+
+                if fase:
+                    context['fase'] = fase = int(fase)
+                    filtros = filtros & Q(tipopartidofase__fase_id=fase)
+                    url_vars += f"&fase={fase}"
+
+                if inicio:
+                    context['inicio'] = inicio
+                    filtros = filtros & Q(fecha__gte=inicio)
+                    url_vars += f"&inicio={inicio}"
+
+                if fin:
+                    context['fin'] = fin
+                    filtros = filtros & Q(fecha__lte=fin)
+                    url_vars += f"&fin={fin}"
+
+                partidos = Partido.objects.filter(filtros)
+                paginator = Paginacion(partidos, 10)
+                page = int(request.GET.get('page', 1))
+                paginator.rangos_paginado(page)
+                context['paging'] = paging = paginator.get_page(page)
+                context['listado'] = paging.object_list
+                context['url_vars'] = url_vars
+                context['tipos'] = TipoPartido.objects.filter(status=True)
+                context['torneos'] = Torneo.objects.filter(status=True)
+                context['fases'] = Fase.objects.filter(status=True)
+                template_name = 'adm_panel/home_anonymous.html'
+                return render(request, template_name, context)
+            except:
+                messages.error(request, f'Error: {ex}')  
+                     
         else:
-            context['title'] = 'Inicio'
-            url_vars, filtros, categoria, tipopartido, fase, torneo, inicio, fin = '', Q(status=True), \
-                                                                        request.GET.get('categoria', ''), \
-                                                                        request.GET.get('tipopartido', ''), \
-                                                                        request.GET.get('fase', ''), \
-                                                                        request.GET.get('torneo', ''),\
-                                                                        request.GET.get('inicio', ''),\
-                                                                        request.GET.get('fin', '')
-            if categoria:
-                context['categoria'] = categoria=int(categoria)
-                filtros = filtros & Q(torneo__generotorneo=categoria)
-                url_vars += f"&categoria={categoria}"
-
-            if torneo:
-                context['torneo'] = torneo = int(torneo)
-                filtros = filtros & Q(torneo_id=torneo)
-                url_vars += f"&torneo={torneo}"
-
-            if tipopartido:
-                context['tipopartido'] = tipopartido = int(tipopartido)
-                filtros = filtros & Q(tipopartido_id=tipopartido)
-                url_vars += f"&tipopartido={tipopartido}"
-
-            if fase:
-                context['fase'] = fase = int(fase)
-                filtros = filtros & Q(tipopartidofase__fase_id=fase)
-                url_vars += f"&fase={fase}"
-
-            if inicio:
-                context['inicio'] = inicio
-                filtros = filtros & Q(fecha__gte=inicio)
-                url_vars += f"&inicio={inicio}"
-
-            if fin:
-                context['fin'] = fin
-                filtros = filtros & Q(fecha__lte=fin)
-                url_vars += f"&fin={fin}"
-
-            partidos = Partido.objects.filter(filtros)
-            paginator = Paginacion(partidos, 10)
-            page = int(request.GET.get('page', 1))
-            paginator.rangos_paginado(page)
-            context['paging'] = paging = paginator.get_page(page)
-            context['listado'] = paging.object_list
-            context['url_vars'] = url_vars
-            context['tipos'] = TipoPartido.objects.filter(status=True)
-            context['torneos'] = Torneo.objects.filter(status=True)
-            context['fases'] = Fase.objects.filter(status=True)
-            template_name = 'adm_panel/home_anonymous.html'
-        return render(request, template_name, context)
+            try:
+                context['title'] = 'Inicio'
+                return render(request, 'adm_panel/inicio.html', context)
+            except Exception as ex:
+                return JsonResponse({'result': False, 'mensaje': f'Error: {ex}'})
+        
 
     def post(self, request, *args, **kwargs):
         action = request.POST['action']

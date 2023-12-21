@@ -169,6 +169,7 @@ class ViewSet(LoginRequiredMixin, View):
                                                 'clubvisitante': instancia.clubvisitante,
                                                 'tipopartidofase': instancia.tipopartidofase,
                                                 'tipopartido': instancia.tipopartido,
+                                                'ubicacion': instancia.ubicacion,
                                                 'fecha': instancia.fecha.date(),
                                                 'hora': instancia.fecha.time()})
                     form.fields['tipopartido'].queryset = TipoPartido.objects.filter(id__in=instancia.torneo.tipopartidos.all().values_list('id', flat=True))
@@ -239,7 +240,7 @@ class ViewSet(LoginRequiredMixin, View):
             elif action == 'cargarintegrantes':
                 try:
                     id = int(request.GET['id'])
-                    integrantes = IntegranteClub.objects.filter(status=True, club_id=id)
+                    integrantes = IntegranteClub.objects.filter(status=True, club_id=id, rol=1)
                     resp = [{'value': qs.pk, 'text': f"{qs.persona}"}
                             for qs in integrantes]
                     return JsonResponse({'result': True, 'data': resp})
@@ -304,8 +305,8 @@ class ViewSet(LoginRequiredMixin, View):
                     instancia = Torneo.objects.get(id=id)
                     form = TorneoForm(instancia=instancia,
                                       initial={'nombre': instancia.nombre,
-                                               'inicio': instancia.inicio.date(),
-                                               'fin': instancia.fin.date(),
+                                               'inicio': instancia.inicio.date() if instancia.inicio else datetime.now.date(),
+                                               'fin': instancia.fin.date() if instancia.inicio else datetime.now.date(),
                                                'generotorneo':instancia.generotorneo})
                     context['tipopartidos'] = TipoPartido.objects.filter(status=True)
                     context['form'] = form
@@ -482,7 +483,7 @@ class ViewSet(LoginRequiredMixin, View):
 
         elif action == 'delclub':
             try:
-                pers = IntegranteClub.objects.get(id=int(encrypt(request.POST['id'])))
+                pers = Club.objects.get(id=int(encrypt(request.POST['id'])))
                 pers.status = False
                 pers.save(request)
                 return JsonResponse({"result": True}, safe=False)
@@ -545,6 +546,7 @@ class ViewSet(LoginRequiredMixin, View):
                                   clublocal=form.cleaned_data['clublocal'],
                                   clubvisitante=form.cleaned_data['clubvisitante'],
                                   tipopartido=form.cleaned_data['tipopartido'],
+                                  ubicacion=form.cleaned_data['ubicacion'],
                                   tipopartidofase=form.cleaned_data['tipopartidofase'],
                                   fecha=datetime.combine(form.cleaned_data['fecha'], form.cleaned_data['hora']))
                 partido.save(request)
@@ -563,6 +565,7 @@ class ViewSet(LoginRequiredMixin, View):
                 instancia.clublocal = form.cleaned_data['clublocal']
                 instancia.clubvisitante = form.cleaned_data['clubvisitante']
                 instancia.tipopartido = form.cleaned_data['tipopartido']
+                instancia.ubicacion=form.cleaned_data['ubicacion']
                 instancia.tipopartidofase = form.cleaned_data['tipopartidofase']
                 instancia.fecha = datetime.combine(form.cleaned_data['fecha'], form.cleaned_data['hora'])
                 instancia.save(request)

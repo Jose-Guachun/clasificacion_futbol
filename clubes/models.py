@@ -266,7 +266,8 @@ class Partido(ModeloBase):
     tipopartidofase = models.ForeignKey(TipoPartidoFase, on_delete=models.CASCADE, blank=True, null=True, verbose_name=u"Partido Fase")
     fecha = models.DateTimeField(blank=True, null=True, verbose_name='Fecha del partido')
     estado = models.IntegerField(default=1, choices=ESTADO_PARTIDO, verbose_name=u'Estado del Partido')
-
+    ubicacion = models.CharField(default='', max_length=500, verbose_name=u"Ubicación del encuentro")
+    
     def __str__(self):
         return f'{self.clublocal} VS {self.clubvisitante}'
 

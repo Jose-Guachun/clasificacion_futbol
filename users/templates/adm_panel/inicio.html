@@ -1,0 +1,130 @@
+{% extends 'base_externo.html' %}
+{% load static %}
+{% load extra_tags %}
+{% block extra_heading %}
+<style>
+    .box-content-img {
+        position: relative;
+        /* Permitir posicionar elementos hijos relativos a este contenedor */
+        background-color: #0b2f44;
+        overflow: hidden;
+        /* Asegurar que el texto no se desborde del contenedor */
+    }
+
+    .box-content-img img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center center;
+    }
+
+    .text-overlay {
+        position: absolute;
+        top: 50%;
+        /* Ajusta según sea necesario */
+         left: 0%; */
+        /* Ajusta según sea necesario */
+        transform: translate(0%, -50%);
+        /* Centrar el texto */
+        color: white;
+        /* Color del texto */
+        text-align: left;
+        width: 100%;
+    }
+
+    /* Otra opción: Hacer la imagen más oscura */
+    .box-content-img::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        background: rgba(0, 0, 0, 0.5);
+        /* Ajusta el valor alpha según sea necesario */
+    }
+</style>
+{% endblock %}
+{% block content_js %}
+
+<script>
+    $(function () {
+        $('select').select2({ width: '100%', minimumResultsForSearch: 6 })
+    });
+</script>
+{% endblock %}
+{% block section_top %}
+
+{% endblock %}
+{% block content_1 %}
+<div class="content-1">
+
+    <div class="box-content-img" style="height: 900px;;width: 100%;">
+        <img src="/static/images/futbol.jpg" alt="">
+        <div class="text-overlay ps-lg-12" style="top: 35%; ">
+            <div class="container-fluid p-4">
+                <div class="row">
+                    <div class="col-12">
+                        <h1 style="font-size: 60px;" class="text-white">FUTBOL UNEMI</h1>
+                        <h3 class="text-white">Bienvenido a FC UNEMI todo los campeonatos <br> disponibles en un solo lugar</h3>
+                    </div>
+                    <div class="col-xl-3 col-lg-6 col-md-12 col-12">
+                        <!-- Card -->
+                        <a href="{{ request.path }}?action=partidos">
+                        <div class="card my-4">
+                            <!-- Card body -->
+                            <div class="card-body">
+                                    <div class="d-flex align-items-center justify-content-between lh-1">
+                                        <div>
+                                            <span class="text-uppercase fw-bold fs-3 text-dark">Partidos</span>
+                                        </div>
+                                        <div>
+                                            <span class="fas fa-futbol fs-2 text-success"></span>
+                                        </div>
+                                    </div>
+                            </div>
+                        </div>
+                    </a>
+                    </div>
+                    <div class="col-xl-3 col-lg-6 col-md-12 col-12">
+                        <!-- Card -->
+                        <a href="{{ request.path }}?action=posiciones">
+                        <div class="card my-4">
+                            <!-- Card body -->
+                            <div class="card-body">
+                                    <div class="d-flex align-items-center justify-content-between lh-1">
+                                        <div>
+                                            <span class="text-uppercase fw-bold fs-3 text-dark">Tabla de posiciones</span>
+                                        </div>
+                                        <div>
+                                            <span class="fas fa-list fs-2 text-success"></span>
+                                        </div>
+                                    </div>
+                            </div>
+                        </div>
+                    </a>
+                    </div>
+                    <div class="col-xl-3 col-lg-6 col-md-12 col-12">
+                        <!-- Card -->
+                        <a href="{{ request.path }}?action=goleadores">
+                        <div class="card my-4">
+                            <!-- Card body -->
+                            <div class="card-body">
+                                    <div class="d-flex align-items-center justify-content-between lh-1">
+                                        <div>
+                                            <span class="text-uppercase fw-bold fs-3 text-dark">Goleadores</span>
+                                        </div>
+                                        <div>
+                                            <i class="fa-solid fa-people-line text-success fs-2"></i>
+                                        </div>
+                                    </div>
+                            </div>
+                        </div>
+                    </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

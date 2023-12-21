@@ -75,7 +75,9 @@
                             <th scope="col" class="text-center">
                                 Fecha/Hora
                             </th>
-
+                            <th scope="col" class="text-center">
+                                Lugar
+                            </th>
                             <th scope="col" class="text-center">
                                 Partido
                             </th>
@@ -97,6 +99,9 @@
                                         <i class="fa-regular fa-clock"></i> {{ l.fecha|time:'G:i' }}
                                     </p>
                                     {{ l.get_estado|safe }}
+                                </td>
+                                <td class="align-middle border-top-0 text-center w-15" title="{{l.ubicacion}}" data-bs-toggle="tooltip">
+                                   {{l.ubicacion|truncatechars:35}}
                                 </td>
                                 <td class="align-middle border-top-0 lh-15 w-50">
                                     <div class="container-fluid">

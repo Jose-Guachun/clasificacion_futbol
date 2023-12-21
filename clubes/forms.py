@@ -125,6 +125,9 @@ class PartidoForm(FormBase):
                             widget=forms.DateTimeInput(attrs={'col': '6'}))
     hora = forms.TimeField(label=u'Hora de encuentro', required=True,
                            widget=forms.TimeInput(attrs={'col': '6'}))
+    ubicacion = forms.CharField(label="Lugar del encuentro",
+                            required=True,
+                            widget=forms.TextInput(attrs={'col': '12', 'placeholder': 'Describa la ubicación donde se va a realizar el encuentro...'}))
 
     def clean(self):
         cleaned_data = super().clean()
@@ -155,7 +158,7 @@ class TarjetaForm(FormBase):
     tiempo = forms.ChoiceField(label=u"Tiempo de partido", required=True,
                              choices=TIEMPOS,
                              widget=forms.Select(attrs={'col': '6','class': 'select2'}))
-    minuto = forms.IntegerField(label=u'Minuto de gol', required=True,
+    minuto = forms.IntegerField(label=u'Minuto de tarjeta', required=True,
                                 widget=forms.NumberInput(attrs={'col': '6', 'placeholder': '0'}))
 
 class GolForm(FormBase):
