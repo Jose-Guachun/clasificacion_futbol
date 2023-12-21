@@ -113,6 +113,16 @@ class MainView(View):
                 return JsonResponse({'result': True, 'data': template.render(context)})
             except Exception as ex:
                 return JsonResponse({'result': False, 'mensaje': f'Error: {ex}'})
+        
+        elif action == 'resultados':
+            try:
+                context['id'] = id = int(encrypt(request.GET['id']))
+                context['partido'] = Partido.objects.get(id=id)
+                template = get_template('adm_panel/resultados.html')
+                return JsonResponse({'result': True, 'data': template.render(context)})
+            except Exception as ex:
+                return JsonResponse({'result': False, 'mensaje': f'Error: {ex}'})
+                 
         else:
             context['title'] = 'Inicio'
             url_vars, filtros, categoria, tipopartido, fase, torneo, inicio, fin = '', Q(status=True), \
