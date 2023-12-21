@@ -305,8 +305,8 @@ class ViewSet(LoginRequiredMixin, View):
                     instancia = Torneo.objects.get(id=id)
                     form = TorneoForm(instancia=instancia,
                                       initial={'nombre': instancia.nombre,
-                                               'inicio': instancia.inicio.date() if instancia.inicio else datetime.now.date(),
-                                               'fin': instancia.fin.date() if instancia.inicio else datetime.now.date(),
+                                               'inicio': instancia.inicio.date() if instancia.inicio else datetime.now().date(),
+                                               'fin': instancia.fin.date() if instancia.inicio else datetime.now().date(),
                                                'generotorneo':instancia.generotorneo})
                     context['tipopartidos'] = TipoPartido.objects.filter(status=True)
                     context['form'] = form
