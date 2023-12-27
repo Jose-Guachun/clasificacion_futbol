@@ -8,15 +8,15 @@
                 {#"paging": false,  // Desactiva el paginador#}
                 {#"searching": false,  // Desactiva el buscador#}
                 "info": false,  // Desactiva la información de las entradas
-                "order": [[3, "dsc"]],  // Ordena por la segunda columna (ColumnaNumerica) de forma ascendente
-                "columnDefs": [{
-                    "targets": 0, // La primera columna
-                    "searchable": false,
-                    "orderable": false,
-                    "render": function (data, type, full, meta) {
-                        return meta.row + 1; // Devuelve el número de fila (empezando desde 1)
-                    }
-                }],
+                {#"order": [[2, "desc"]],  // Ordena por la segunda columna (ColumnaNumerica) de forma ascendente#}
+                {#"columnDefs": [{#}
+                {#    "targets": 0, // La primera columna#}
+                {#    "searchable": false,#}
+                {#    "orderable": false,#}
+                {#    "render": function (data, type, full, meta) {#}
+                {#       return meta.settings._iDisplayStart + meta.row + 1;#}
+                {#    }#}
+                {# }],#}
                 "language": {
                     "decimal": "",
                     "emptyTable": "No hay datos disponibles en la tabla",
@@ -118,14 +118,16 @@
                         <tbody>
                         {% for l in listado %}
                             <tr>
-                                <td class="text-center align-middle w-3"></td>
+                                <td class="text-center align-middle w-3">
+                                    {{ forloop.counter}}
+                                </td>
                                 <td class="align-middle border-top-0 lh-15 w-50">
                                     {{ l.get_escudo_img_sm|safe }}
                                     {{ l|title_cap }}
                                 </td>
                                 {% with resultado=l|args:torneo|call:'resultados_torneo' %}
                                     <td class="text-center align-middle">
-                                        {{ resultado.total_puntos }}
+                                        {{ l.puntos }}
                                     </td>
                                     <td class="text-center align-middle">
                                         {{ resultado.total_partidos }}

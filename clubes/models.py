@@ -48,6 +48,23 @@ class Club(ModeloBase):
     def __str__(self):
         return u'%s' % self.nombre
 
+    def generar_codigo(self):
+        nombres = self.nombre.split(' ')
+        siglas = ''
+        for n in nombres:
+            siglas += n[0].upper()
+        numero = len(Club.objects.filter(status=True)) + 1
+        palabra = f'{siglas}{self.id}{numero}'
+        return palabra
+
+    def generar_siglas(self):
+        nombres = self.nombre.split(' ')
+        siglas = ''
+        for n in nombres:
+            siglas += n[0].upper()
+        palabra = f'{siglas}{self.id}'
+        return palabra
+
     def club_in_torneo(self, idtorneo=None):
         if idtorneo:
             torneo = Torneo.objects.get(id=int(idtorneo))

@@ -1,6 +1,7 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import transaction
-from django.db.models import Q
+from django.db.models import Q, Count, Sum, Value
+from django.db.models.functions import Coalesce
 from django.forms import model_to_dict
 from django.http import JsonResponse, HttpResponseRedirect
 from django.shortcuts import render
@@ -34,7 +35,10 @@ class MainView(View):
                 else:
                     torneo = Torneo.objects.get(id=torneo)
 
-                equipos = torneo.equipos.all()
+                equipos = torneo.equipos.annotate(puntos=Coalesce(Sum('resultadopartido__puntos',
+                                                  filter=Q(resultadopartido__status=True,
+                                                         resultadopartido__partido__torneo=torneo)),
+                                                         Value(0))).order_by('-puntos')
                 # PAGINADOR
                 paginator = Paginacion(equipos, 50)
                 page = int(request.GET.get('page', 1))

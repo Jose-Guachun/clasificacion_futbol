@@ -4,7 +4,8 @@ from datetime import datetime
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import transaction
-from django.db.models import Q, Sum
+from django.db.models import Q, Sum, Value
+from django.db.models.functions import Coalesce
 from django.forms import model_to_dict
 from django.http import JsonResponse, HttpResponseRedirect
 from django.shortcuts import render
@@ -333,7 +334,10 @@ class ViewSet(LoginRequiredMixin, View):
                         context['s'] = search
                         url_vars += '&s=' + search
                         filtro = filtro & Q(nombre__icontains=search)
-                    equipos = torneo.equipos.all()
+                    equipos = torneo.equipos.annotate(puntos=Coalesce(Sum('resultadopartido__puntos',
+                                                  filter=Q(resultadopartido__status=True,
+                                                         resultadopartido__partido__torneo=torneo)),
+                                                         Value(0))).order_by('-puntos')
                     # PAGINADOR
                     paginator = Paginacion(equipos, 50)
                     page = int(request.GET.get('page', 1))
@@ -419,6 +423,7 @@ class ViewSet(LoginRequiredMixin, View):
                 paginator = Paginacion(cursos, 10)
                 page = int(request.GET.get('page', 1))
                 paginator.rangos_paginado(page)
+                context['sincodigo'] = Club.objects.filter(status=True, codigo='')
                 context['paging'] = paging = paginator.get_page(page)
                 context['listado'] = paging.object_list
                 return render(request, 'clubes/view.html', context)
@@ -449,6 +454,8 @@ class ViewSet(LoginRequiredMixin, View):
                             descripcion=form.cleaned_data['descripcion'],
                             tipoequipo=form.cleaned_data['tipoequipo'],
                             escudo=newfile)
+                club.save(request)
+                club.codigo = club.generar_codigo()
                 club.save(request)
                 return JsonResponse({"result": True, })
             except Exception as ex:
@@ -845,6 +852,17 @@ class ViewSet(LoginRequiredMixin, View):
                 messages.success(request, 'Se valido y notifico exitosamente')
                 return JsonResponse({"result": True}, safe=False)
             except Exception as ex:
-                return JsonResponse({"result": False, "mensaje": f'Error {ex}'})  
-        
+                return JsonResponse({"result": False, "mensaje": f'Error {ex}'})
+
+        elif action == 'generarcodigos':
+            try:
+                equipos = Club.objects.filter(status=True, codigo='')
+                for idx, equipo in enumerate(equipos):
+                    equipo.codigo = f'{equipo.generar_siglas()}{idx}'
+                    equipo.save()
+                messages.success(request, f'Se generaron {len(equipos)} códigos')
+                return JsonResponse({"result": True}, safe=False)
+            except Exception as ex:
+                return JsonResponse({"result": False, "mensaje": f'Error {ex}'})
+
         return JsonResponse({"result": False, "mensaje": u"Solicitud Incorrecta."})

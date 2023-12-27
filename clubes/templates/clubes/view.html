@@ -14,6 +14,12 @@
 {% endblock %}
 {% block botones_top %}
     <div class="nav btn-group" role="tablist">
+        {% if sincodigo %}
+            <a href="javascript:void(0)"
+               onclick="accionNotificar('','Estas por generar códigos a todos los equipos que no lo dispongan','generarcodigos','Generar códigos')" class="btn btn-primary btn-xs btn-xl"
+               title="Adicionar club" data-bs-toggle="tooltip"> <i class="fas fa-cogs"></i> Generar códigos
+            </a>
+        {% endif %}
         <a href="javascript:void(0)"
            onclick="formModal('','Adicionar partido','addclub','modal-md')" class="btn btn-success btn-xs btn-xl"
            title="Adicionar club" data-bs-toggle="tooltip"> <i class="fas fa-plus"></i> Adicionar</a>
@@ -57,6 +63,9 @@
                             <th class="text-center">
                                 Integrantes
                             </th>
+                             <th class="text-center">
+                                Código
+                            </th>
                             <th class="text-center w-3">
                                 <i class="fas fa-cogs"></i>
                             </th>
@@ -86,6 +95,9 @@
                                 </td>
                                 <td class="w-5 align-middle text-center">
                                     {{ l.total_integrantes|length }}
+                                </td>
+                                 <td class="w-3 align-middle text-center">
+                                    {{ l.codigo }}
                                 </td>
                                 <td class="align-middle border-top-0 text-center w-3">
                                 <span class="dropdown dropstart">
