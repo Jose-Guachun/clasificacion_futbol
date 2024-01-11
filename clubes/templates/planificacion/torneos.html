@@ -58,6 +58,9 @@
                             <th scope="col" class="">
                                 Estructura de torneo
                             </th>
+                            <th scope="col" class="">
+                                Valor tarjeta
+                            </th>
                             <th>Total Equipos</th>
                             <th class="text-center">
                                 <i class="fas fa-cogs"></i>
@@ -86,6 +89,13 @@
                                                 <p class="ps-3">{{ tf.fase }}</p>
                                             {% endfor %}
                                         </div>
+                                    {% endfor %}
+                                </td>
+                                <td class="align-middle border-top-0 lh-15 w-50">
+                                    {% for tarjeta in l.tarjetas %}
+                                        <h6 class="mb-2">
+                                            {{ tarjeta.tipotarjeta }}: <span class="text-secondary">${{tarjeta.valor}}</b>
+                                        </h6>
                                     {% endfor %}
                                 </td>
                                 <td class="text-center w-5 align-middle">{{ l.equipos.all|length }}</td>

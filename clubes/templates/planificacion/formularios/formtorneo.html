@@ -30,7 +30,26 @@
         }
     </script>
 {% endblock %}
-{% block extra_input_modal %}
+{% block extra_input_seccion %}
+<div class="row  mt-2">
+    <label for="courseTitle" class="form-label mb-1"><i class="fas fa-sheet-plastic"></i> Valor de tarjetas<span
+            style="color:red;margin-left:2px;"><strong>*</strong></span>:</label>
+    
+        {% for tipo in tipotarjetas %}
+            <div class="col-6 ps-5 d-flex align-items-center">
+                <div class="mb-2">
+                    <h5 class="mb-0">
+                        {{ tipo }} :
+                    </h6>
+                </div>
+            </div>
+            <div class="col-6 ps-5">
+                {% with valortarjeta=tipo|args:torneo|call:'valortarjeta'%}
+                    <input type="number" name="tipotarjeta_{{tipo.id}}" id="id_tipotarjeta" class="tipotarjeta form-control" value="{{ valortarjeta }}"> 
+                {% endwith %}
+            </div>
+        {% endfor %}
+</div>
     <div class="row  mt-2">
         <label for="courseTitle" class="form-label mb-1"><i class="fas fa-futbol"></i> Partidos disponibles<span
                 style="color:red;margin-left:2px;"><strong>*</strong></span>:</label>

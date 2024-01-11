@@ -267,6 +267,9 @@ class Torneo(ModeloBase):
 
     def en_uso(self):
         return self.partido_set.filter(status=True).exists()
+    
+    def tarjetas(self):
+        return self.tarjetatorneo_set.filter(status=True)
     class Meta:
         verbose_name = u"Torneo"
         verbose_name_plural = u"Torneos"
@@ -364,6 +367,12 @@ class TipoTarjeta(ModeloBase):
     def __str__(self):
         return f'{self.nombre}'
 
+    def valortarjeta(self, torneo):
+        tarjetatorneo = self.tarjetatorneo_set.filter(status=True, torneo=torneo).first()
+        if tarjetatorneo:
+            return tarjetatorneo.valor
+        return self.valor 
+    
     def validate_unique(self, exclude=None):
         super().validate_unique(exclude=exclude)
         qs = TipoTarjeta.objects.filter(status=True, nombre=self.nombre).exclude(pk=self.pk).exists()
@@ -375,6 +384,24 @@ class TipoTarjeta(ModeloBase):
         verbose_name_plural = u"Tipos de tarjetas"
         ordering = ['nombre']
 
+
+class TarjetaTorneo(ModeloBase):
+    torneo = models.ForeignKey(Torneo, on_delete=models.CASCADE, blank=True, null=True, verbose_name=u"torneo")
+    tipotarjeta = models.ForeignKey(TipoTarjeta, on_delete=models.CASCADE, blank=True, null=True, verbose_name=u"torneo")
+    valor = models.FloatField(default=0, blank=True, null=True, verbose_name=u"Valor de tarjeta")
+
+    def __str__(self):
+        return f'{self.nombre}'
+
+    def validate_unique(self, exclude=None):
+        super().validate_unique(exclude=exclude)
+        qs = TarjetaTorneo.objects.filter(status=True, torneo=self.torneo, tipotarjeta=self.tipotarjeta).exclude(pk=self.pk).exists()
+        if qs:
+            raise NameError('Ya existe un registro con los datos que intenta registrar.')
+
+    class Meta:
+        verbose_name = u"Tarjeta de Torneo"
+        verbose_name_plural = u"Tarjetas de Torneo"
 
 class TarjetaPartido(ModeloBase):
     partido = models.ForeignKey(Partido, on_delete=models.CASCADE, blank=True, null=True, verbose_name=u"Partido en el que recibe la tarjeta")

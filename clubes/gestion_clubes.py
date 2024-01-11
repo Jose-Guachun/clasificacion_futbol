@@ -16,7 +16,7 @@ from users.models import Persona, Provincia, Pais, Ciudad
 from users.templatetags.extra_tags import encrypt
 from core.funciones import Paginacion, filtro_persona_generico, filtro_persona_generico_principal, generar_nombre_file
 from core.generic_save import add_user_with_profile, edit_persona_with_profile, gestionarusuario
-from clubes.models import Club, IntegranteClub, TIPO_ROL, PagoRubroTarjeta, Partido, TipoPartido, TipoPartidoFase, TarjetaPartido, Torneo, GolPartido, ResultadoPartido
+from clubes.models import Club, IntegranteClub, TIPO_ROL, PagoRubroTarjeta, Partido, TarjetaTorneo, TipoPartido, TipoPartidoFase, TarjetaPartido, TipoTarjeta, Torneo, GolPartido, ResultadoPartido
 from clubes.forms import ClubForm, IntegranteForm, PartidoForm, TarjetaForm, TorneoForm, GolForm
 
 
@@ -295,6 +295,7 @@ class ViewSet(LoginRequiredMixin, View):
                     context['torneo'] = False
                     context['seccionado'] = True
                     context['tipopartidos'] = TipoPartido.objects.filter(status=True)
+                    context['tipotarjetas'] = TipoTarjeta.objects.filter(status=True)
                     template = get_template('planificacion/formularios/formtorneo.html')
                     return JsonResponse({'result': True, 'data': template.render(context)})
                 except Exception as ex:
@@ -313,6 +314,7 @@ class ViewSet(LoginRequiredMixin, View):
                     context['form'] = form
                     context['seccionado'] = True
                     context['torneo'] = instancia
+                    context['tipotarjetas'] = TipoTarjeta.objects.filter(status=True)
                     template = get_template('planificacion/formularios/formtorneo.html')
                     return JsonResponse({'result': True, 'data': template.render(context)})
                 except Exception as ex:
@@ -606,7 +608,7 @@ class ViewSet(LoginRequiredMixin, View):
                                            tipotarjeta=form.cleaned_data['tipotarjeta'],
                                            tiempo=form.cleaned_data['tiempo'],
                                            minuto=form.cleaned_data['minuto'],
-                                           valor=form.cleaned_data['tipotarjeta'].valor,
+                                           valor=form.cleaned_data['tipotarjeta'].valortarjeta(partido.torneo),
                                            integrante=form.cleaned_data['integrante'])
                 instancia.save(request)
                 # integrante=form.cleaned_data['integrante']
@@ -721,7 +723,10 @@ class ViewSet(LoginRequiredMixin, View):
                     instancia.tipopartidos.add(int(tipo))
                 for equipo in equipos:
                     instancia.equipos.add(int(equipo))
-
+                for t_tarjeta in TipoTarjeta.objects.filter(status=True):
+                    valor_tarjeta=request.POST.get(f'tipotarjeta_{t_tarjeta.id}',0)
+                    tarjeta=TarjetaTorneo(torneo=instancia, tipotarjeta=t_tarjeta ,valor=valor_tarjeta)
+                    tarjeta.save(request)
                 return JsonResponse({"result": True, })
             except Exception as ex:
                 transaction.set_rollback(True)
@@ -748,6 +753,15 @@ class ViewSet(LoginRequiredMixin, View):
                 torneo.equipos.clear()
                 for equipo in equipos:
                     torneo.equipos.add(int(equipo))
+                
+                for t_tarjeta in TipoTarjeta.objects.filter(status=True):
+                    valor_tarjeta=request.POST.get(f'tipotarjeta_{t_tarjeta.id}',0)
+                    tarjeta = TarjetaTorneo.objects.filter(torneo=torneo, tipotarjeta=t_tarjeta).first()
+                    if not tarjeta:
+                        tarjeta=TarjetaTorneo(torneo=torneo, tipotarjeta=t_tarjeta ,valor=valor_tarjeta)
+                    else:
+                        tarjeta.valor = valor_tarjeta
+                    tarjeta.save(request)
                 return JsonResponse({"result": True, })
             except Exception as ex:
                 transaction.set_rollback(True)
