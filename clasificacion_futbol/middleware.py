@@ -14,7 +14,7 @@ class BlockUrlsMiddleware:
     def __call__(self, request):
         """Código a ejecutar para cada solicitud antes de que se llame a
             la vista."""
-        if not request.user.is_anonymous:
+        if not request.user.is_anonymous and not request.user.is_superuser:
             #if not request.user.is_staff:
             dosfactores=request.session['dosfactores']
             autenticado=request.session['autenticado']
