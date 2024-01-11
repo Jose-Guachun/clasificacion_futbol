@@ -1,6 +1,6 @@
 from django.contrib import admin
 from core.models import ModeloBaseAdmin
-from users.models import Persona,Pais,Provincia,Ciudad
+from users.models import Persona,Pais,Provincia,Ciudad, UsuariosAcceso
 # Register your models here.
 class PersonaAdmin(ModeloBaseAdmin):
     list_display = ('nombres',)
@@ -23,7 +23,13 @@ class CiudadAdmin(ModeloBaseAdmin):
     search_fields = ('nombre',)
 
 
+class UsuariosAccesoAdmin(ModeloBaseAdmin):
+    list_display = ('cedula','email')
+    ordering = ('cedula',)
+    search_fields = ('cedula',)
+
 admin.site.register(Persona, PersonaAdmin)
 admin.site.register(Pais, PaisAdmin)
 admin.site.register(Provincia, ProvinciaAdmin)
 admin.site.register(Ciudad, CiudadAdmin)
+admin.site.register(UsuariosAcceso, UsuariosAccesoAdmin)
